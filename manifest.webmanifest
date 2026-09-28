@@ -10,13 +10,13 @@
   "theme_color": "#301522",
   "icons": [
     {
-      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v1",
+      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v1",
+      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "maskable"
