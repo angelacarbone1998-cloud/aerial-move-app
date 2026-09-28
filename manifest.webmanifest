@@ -1,0 +1,25 @@
+{
+  "name": "Aerial Move",
+  "short_name": "Aerial Move",
+  "description": "Calendario, allenamenti e gestione della palestra Aerial Move",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffafd",
+  "theme_color": "#301522",
+  "icons": [
+    {
+      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v1",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v1",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
