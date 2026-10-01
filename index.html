@@ -29,7 +29,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const APP_VERSION='2026.09.28.31';
+    const APP_VERSION='2026.10.01.32';
     const STORAGE_KEY='aerial_move_session_v2';
     const state={role:'atlete',mode:'login',token:localStorage.getItem(STORAGE_KEY)||sessionStorage.getItem(STORAGE_KEY)||'',profile:null,tab:'home',athletes:[],editing:null};
     async function checkForAppUpdate(){try{const updateUrl=new URL('index.html?app-update='+Date.now(),location.href);const response=await fetch(updateUrl,{cache:'no-store'});if(!response.ok)return;const html=await response.text();const match=html.match(/const APP_VERSION='([^']+)'/);if(match&&match[1]!==APP_VERSION){const nextUrl=new URL(location.href);nextUrl.searchParams.set('v',match[1]);location.replace(nextUrl)}}catch{}}
@@ -39,7 +39,7 @@
     setInterval(checkForAppUpdate,60000);
     const brandLogo='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAq1BMVEX////9+vr79fX36+v25+f58vL47u7t1NXqxsfuz9Dy2Nnw8PD5+PjdrrDz8/Po5+fY19fHxsb47Ozv39/TmJmnp6e3t7fNk5Tkt7mPj4/mvsD79vbgr7CYl5ixqKh2dXbapqdvb2/Ih4jas7S4iIqHh4elm5yFfX1lZWbvzs9YWFjUnp9HR0guLzA1NTX79PTLt7itgYKDYmNtV1gtLi/ew8SoZWa3eHnAf4CKHFOAAAADaElEQVRYw+1Wa3ebMAw1wcbGBGy3QExIgknGRmhCu1e7///LZhIg0DqPrmffqg85oFgXSVeSBcCnfMotYk0+aG9bH7OH6GMOQPgxBxwM/9l3ZDsTQFyqnyfe9N1fphQiCyAfu/otYFxw7x3md657DP0+xOSYA09EMbvVeUy6wPEMS6d9DkQS3xQJmpMU9ADuAvf/sOXyBifu5MkCwJDIRQ8HpquMX82eP7AHllJYkYEizq8goJE9AGS9IYoOFFF+MQpLkrGCfVn7ZDFAmBZFcAEA+69aL/j6ZabmhJ7qmeXxhQDU68Jl2TepFgQPOiIuzwdB5BsVL9iWbF1q91wE2fKcvaPedk6giYPUhi7t21pU51xwpUFZ6JBTB0FJupL08shsb72i8ChJ0fymtqtk50OUm6ccVKbhsyoPbZhSOWv7CvCKGwHwmwjEUlj9aTx7aFMUnGHydREBsdvvIlZ1pzdh50KRGAF8On5n5X6/z1nVsQZVl8coMw3K1G89ZJyzply9rNzVGqBoD0wpaT8hclM5I/+A78XZMsmy4muscdiqruqyHWaW3QOUnhHgQELAOZgyERV5WZVZWe/rOjkOImSTlmdurOYWoJeAiTg5ANSieZ84tqSXACa+81YZiEoDNJWX2o+0KyVuDMHyjXcIr+r9sqnmRzjfdvwakwgkNWlBtNcAjm3Tbd8Nq8J4krhmgOrbE6WYkG3vYWJuaDouZct6dGxI8WZD9GheSNzf85NMGAGQPDVZihyItZ1SYThbr9ehxCeO2LnBOu+S4MB76hIpW4BZqCQdcBybU6BjaLsJbmkjDcRCPYRh6BN4ul3ANDs3VtMjz1DqEQZ10hsHlPr+4+fT6BjPzl7UtClVi7i242gECiF0HifZfsdHp5Lzc90i2gVdsClCaZfyoPyVjy5lkV3YFKB2AS7w77uTiu3q0Re9QoALQiGgi83zYDaJelz40fKSvd7qLOi/PIcn0pKxA6K4supYaeo/v6znHW1slw0bR19U4KrgP39m/rZFiEYjnCf8uj2YqLW+TylqeGDlMABxy4oDGh6UJNRBCEyTwS3mxatbVz2HaABdRjCO+v7yxOoW97tU2vf0ntKnVTsCps2mGdxu30hqU/IkiX005+zdy26zLcOtPMyIfzDuBA37+FP+l/wFETg6LEjmc4kAAAAASUVORK5CYII=';
     const activityOptions=['Ginnastica acrobatica','Tessuto aereo','Cerchio aereo agonista','Lollipop','Cerchio aereo non agonista','Cerchio aereo agonista + Move Lab','Cerchio aereo non agonista + Move Lab','Mini Move','Amaca aerea baby','Amaca aerea relax','Pole Dance','Bungee Fly','Pilates Base','Pilates Plus','Surf Pilates','Hip Hop'];
-    const instructorOptions=['MARTINA','ITALIA','ANGELA','ROSALINDA','DEBORA','PHILOMENA','ORNELLA','ANDREA'];
+    const instructorOptions=['MARTINA','ITALIA','ANGELA','ROSALINDA','DEBORA','PHILOMENA','ROBERTO','ANDREA'];
     const trainingImages={strength:'training/strength-bridge.jpg',stretch:'training/stretching-flexibility.jpg',cool:'training/cooldown-mobility.jpg'};
     const trainingWarm=[
       ['Collo','Esegui tiraggi laterali aiutandoti delicatamente con la mano. Porta poi il mento verso il petto e fai 10 inclinazioni lente a destra e sinistra; mantieni ogni allungo 20 secondi.'],
