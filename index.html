@@ -12,7 +12,7 @@
   <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
   <link rel="icon" type="image/png" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
-  <link rel="manifest" href="manifest.webmanifest?v=2026.10.07.36">
+  <link rel="manifest" href="manifest.webmanifest?v=2026.10.07.37">
   <title>Aerial Move</title>
   <style>
     :root{--ink:#281721;--wine:#311725;--pink:#e64286;--paper:#fffafd;--line:#eadfe6;--muted:#766b72;--good:#198258}
@@ -32,7 +32,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const APP_VERSION='2026.10.07.36';
+    const APP_VERSION='2026.10.07.37';
     const STORAGE_KEY='aerial_move_session_v2';
     const state={role:'atlete',mode:'login',token:localStorage.getItem(STORAGE_KEY)||sessionStorage.getItem(STORAGE_KEY)||'',profile:null,tab:'home',athletes:[],editing:null};
     let updateCheckRunning=false;
@@ -136,8 +136,8 @@
     async function saveAthletePassword(event){event.preventDefault();const password=document.getElementById('new-athlete-password').value;const confirm=document.getElementById('confirm-athlete-password').value;const message=document.getElementById('access-message');if(password!==confirm){message.innerHTML='<p class="notice error">Le due password non coincidono.</p>';return}try{await server('athlete.password.update',{password});document.getElementById('new-athlete-password').value='';document.getElementById('confirm-athlete-password').value='';message.innerHTML='<p class="notice">Password Atlete aggiornata. Le atlete dovranno accedere di nuovo.</p>'}catch{message.innerHTML='<p class="notice error">Non è stato possibile aggiornare la password.</p>'}}
     function renderInstructors(){document.getElementById('content').innerHTML='<section class="card"><div class="card-head"><div><p class="eyebrow">TEAM AERIAL MOVE</p><h2>Le istruttrici</h2></div><span class="status">'+instructorOptions.length+' istruttrici</span></div><div class="instructor-list">'+instructorOptions.map((name)=>'<div class="instructor-card"><span class="instructor-avatar">'+esc(name.charAt(0))+'</span><b>'+esc(name)+'</b></div>').join('')+'</div></section>'}
     async function loadMetrics(){try{const data=await server('metrics');document.getElementById('metric-athletes').textContent=data.athletes;document.getElementById('metric-subs').textContent=data.subscriptions;document.getElementById('metric-medical').textContent=data.medical}catch{}}
-    const calendarActivities={room1:[['Pilates','Pilates','Pilates','Pilates','Pilates','Pilates'],['Amaca','', 'Amaca','','','']],room2:[['Mini Move','Tessuto / Amaca','Mini Move','Tessuto / Amaca','Attrezzi vari','Cerchio A'],['Cerchio N.A.','Move Lab','Hip Hop','Cerchio N.A.','Move Lab','Hip Hop'],['Cerchio A','Bungee','Cerchio A','Bungee','','']]};
-    const fallbackCalendarTimes={room1:[['17:15–20:15','18:15–20:15','17:15–20:15','18:15–20:15','17:15–20:15','17:15–20:15'],['20:30–21:30','','20:30–21:30','','','']],room2:[['17:15–18:15','17:00–18:00','17:15–18:15','17:00–18:00','17:00–18:15','15:00–17:00'],['18:15–19:30','18:00–19:30','17:30–18:30','18:15–19:30','18:15–20:00','17:00–19:00'],['19:30–20:30','19:00–20:00','18:30–20:30','19:30–20:30','','']]};
+    const calendarActivities={room1:[['Pilates','Pilates','Pilates','Pilates','Pilates','Pilates'],['Amaca aerea','Mini Move','Amaca aerea','Mini Move','','']],room2:[['Cerchio aereo N.A.','Tessuto aereo','Hip Hop','Tessuto aereo','Attrezzi vari','Cerchio aereo A'],['Cerchio aereo A','Move Lab','Cerchio aereo A','Cerchio aereo N.A.','Move Lab','Hip Hop'],['','Bungee Fitness','','Bungee Fitness','','']]};
+    const fallbackCalendarTimes={room1:[['17:15–20:15','18:15–20:15','17:15–20:15','18:15–20:15','17:15–20:15','17:15–20:15'],['20:30–21:30','17:15–18:15','20:30–21:30','17:15–18:15','','']],room2:[['18:15–19:30','17:00–18:00','17:30–18:30','17:00–18:00','17:00–18:15','15:00–17:00'],['19:30–20:30','18:00–19:30','18:30–20:30','18:15–19:30','18:15–20:00','17:00–19:00'],['','19:00–20:00','','19:30–20:30','','']]};
     function renderCalendar(){renderCalendarTimes(fallbackCalendarTimes);loadCalendarTimes()}
     function renderCalendarTimes(times){const days=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'],slot=(name,time)=>name&&time?'<span class="slot">'+esc(name)+'<small>'+esc(time)+'</small></span>':'',table=(title,activities,roomTimes)=>'<section class="card" style="margin-bottom:16px"><p class="eyebrow">'+title+'</p><div class="table-wrap"><table class="schedule"><thead><tr><th>Fascia</th>'+days.map((day)=>'<th>'+day+'</th>').join('')+'</tr></thead><tbody>'+activities.map((row,rowIndex)=>'<tr><th>'+(rowIndex+1)+'</th>'+row.map((name,dayIndex)=>'<td>'+slot(name,roomTimes[rowIndex][dayIndex])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';document.getElementById('content').innerHTML=table('STANZA 1 · PILATES E AMACA',calendarActivities.room1,times.room1)+table('STANZA 2 · CALENDARIO CORSI',calendarActivities.room2,times.room2)}
     async function loadCalendarTimes(){try{const url=new URL('calendar-times.json',location.href);url.searchParams.set('refresh',Date.now());const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('Calendario non disponibile');const times=await response.json();if(!Array.isArray(times.room1)||!Array.isArray(times.room2))throw new Error('Calendario non valido');if(state.tab==='calendar')renderCalendarTimes(times)}catch{}}
