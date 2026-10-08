@@ -12,7 +12,17 @@
 <label for="loginPass">Password della sezione</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="La password già impostata">
 <label style="font-weight:400"><input type="checkbox" id="remember" checked style="width:auto;vertical-align:middle"> Ricorda l'accesso su questo dispositivo (fino a 7 giorni)</label>
 <button type="button" class="full" id="loginButton" style="margin-top:15px">Accedi</button>
-<p class="muted">La prima password di Aerial Move è già registrata. Per creare quella personale entra prima in Aerial Move e seleziona “Attiva Personale”.</p>
+<p class="muted" id="loginHelp">Se hai già una password per questa sezione, usala per accedere.</p>
+<div id="personalFirstSetup" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
+ <h3>Prima attivazione Personale Angela</h3>
+ <p class="muted">Non serve un'email. Per autorizzare l'attivazione, usa la password Aerial Move già funzionante e scegli una nuova password personale.</p>
+ <label for="setupCompanyPass">Password Aerial Move</label><input id="setupCompanyPass" type="password" autocomplete="off" placeholder="Password aziendale già creata">
+ <label for="setupPersonalPass">Nuova password Personale Angela</label><input id="setupPersonalPass" type="password" minlength="10" autocomplete="new-password" placeholder="Almeno 10 caratteri">
+ <label for="setupPersonalConfirm">Ripeti la nuova password personale</label><input id="setupPersonalConfirm" type="password" minlength="10" autocomplete="new-password">
+ <button id="activatePersonal" type="button" class="full" style="margin-top:14px">Attiva e apri Personale Angela</button>
+ <p id="activationError" class="notice hide" role="alert"></p>
+</div>
+<button type="button" class="alt" id="showPersonalSetup" style="margin-top:10px">Attiva per la prima volta Personale Angela</button>
 <div id="error" role="alert" class="notice hide"></div>
 </section>
 <section id="dashboard" class="hide">
@@ -42,12 +52,43 @@ const today=new Date().toLocaleDateString('en-CA');$('month').value=today.slice(
 let ledger='azienda',token='',rows=[],filter='all',remember=true;
 let toastTimer;function say(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',5200)}
 function message(s){$('error').textContent=s;$('error').classList.remove('hide')}
-function loginView(){token='';rows=[];$('loginCard').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');$('loginButton').disabled=false;$('loginPass').value='';$('loginLedger').value=ledger;$('error').classList.add('hide')}
+function loginView(){token='';rows=[];$('loginCard').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');$('loginButton').disabled=false;$('loginPass').value='';$('loginLedger').value=ledger;$('error').classList.add('hide');refreshSetup()}
 function savedKey(l){return 'am_finanze_v2_'+l}
 async function openSection(t,l){token=t;ledger=l;$('dashboard').classList.remove('hide');$('loginCard').classList.add('hide');$('logout').classList.remove('hide');$('sectionTitle').textContent=l==='azienda'?'Aerial Move':'Personale Angela';$('setupPanel').classList.toggle('hide',l!=='azienda');filter='all';await load()}
 async function signIn(l,p){$('loginButton').disabled=true;$('error').classList.add('hide');if(p.length<8){message('Inserisci la password della sezione.');$('loginButton').disabled=false;return}try{const{data,error}=await db.rpc('finanze_login_direct',{p_ledger:l,p_password:p});if(error)throw error;if(!data){message('Password non riconosciuta o accesso temporaneamente limitato. Se conosci la password di Aerial Move, seleziona quella sezione.');return}if($('remember').checked)localStorage.setItem(savedKey(l),data);else sessionStorage.setItem(savedKey(l),data);await openSection(data,l)}catch(e){message('Accesso non riuscito: '+e.message)}finally{$('loginButton').disabled=false}}
 $('loginButton').onclick=()=>signIn($('loginLedger').value,$('loginPass').value);
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')signIn($('loginLedger').value,$('loginPass').value)});
+function refreshSetup(){const personal=$('loginLedger').value==='personale';$('showPersonalSetup').classList.toggle('hide',!personal);if(!personal)$('personalFirstSetup').classList.add('hide')}
+$('showPersonalSetup').onclick=()=>{$('personalFirstSetup').classList.toggle('hide');$('activationError').classList.add('hide')};
+$('activatePersonal').onclick=async()=>{
+ const biz=$('setupCompanyPass').value,pass=$('setupPersonalPass').value,confirm=$('setupPersonalConfirm').value;
+ const fail=m=>{$('activationError').textContent=m;$('activationError').classList.remove('hide')};
+ $('activationError').classList.add('hide');
+ if(biz.length<8)return fail('Inserisci la password Aerial Move già utilizzata.');
+ if(pass.length<10)return fail('La nuova password personale deve contenere almeno 10 caratteri.');
+ if(pass!==confirm)return fail('Le due password personali non coincidono.');
+ if(pass===biz)return fail('Usa una password personale diversa da quella aziendale.');
+ $('activatePersonal').disabled=true;
+ let temporaryToken=null;
+ try{
+  const login=await db.rpc('finanze_login_direct',{p_ledger:'azienda',p_password:biz});
+  if(login.error)throw login.error;
+  if(!login.data)return fail('Password Aerial Move non riconosciuta, oppure troppi tentativi. Non continuare a riprovare: attendi 15 minuti se necessario.');
+  temporaryToken=login.data;
+  const setup=await db.rpc('finanze_initialize_personal',{p_token:temporaryToken,p_new_password:pass});
+  if(setup.error)throw setup.error;
+  if(!setup.data)return fail('La sezione personale risulta già attivata. Prova ad accedere con la password personale preesistente.');
+  $('setupCompanyPass').value='';$('setupPersonalPass').value='';$('setupPersonalConfirm').value='';
+  $('personalFirstSetup').classList.add('hide');
+  say('Password personale creata. Accesso in corso…');
+  await signIn('personale',pass);
+ }catch(e){fail('Attivazione non riuscita: '+(e?.message||'errore sconosciuto'))}
+ finally{
+  if(temporaryToken)await db.rpc('finanze_direct_logout',{p_token:temporaryToken}).catch(()=>{});
+  $('activatePersonal').disabled=false;
+ }
+};
+refreshSetup();
 async function logout(){if(token)await db.rpc('finanze_direct_logout',{p_token:token});localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView()}
 $('logout').onclick=logout;$('switch').onclick=async()=>{let other=ledger==='azienda'?'personale':'azienda';let t=localStorage.getItem(savedKey(other))||sessionStorage.getItem(savedKey(other));if(t){await openSection(t,other)}else{ledger=other;loginView()}}
 $('refresh').onclick=()=>{const u=new URL(location.href);u.searchParams.set('v',String(Date.now()));location.replace(u.href)};
@@ -72,5 +113,5 @@ if(ledger==='azienda'){for(let i=0;i<4;i++){const date=new Date(2026,9+i,5).toLo
 else{for(let i=0;i<12;i++)add(new Date(2026,9+i,17).toLocaleDateString('en-CA'),'Entrata mensile',1500,'entrata','Stipendio');add('2026-10-18','Mercatorum arretrati',900,'uscita','Rate','Tre rate scadute di luglio-agosto-settembre; proposta di rientro da concordare');add('2026-10-18','Mercatorum rata ottobre',300,'uscita','Rate');add('2026-10-31','PayPal totale residuo',698,'uscita','Rate','Scadenza da confermare');add('2026-10-31','Klarna totale residuo',163,'uscita','Rate','Scadenza da confermare')}
 let ok=0;for(const r of rec){const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:r});if(error){say('Interrotto: '+error.message);break}ok++}say('Inseriti '+ok+' movimenti previsti');await load()};
 (async()=>{ledger=localStorage.getItem('am_finanze_preferred')||'azienda';$('loginLedger').value=ledger;const t=localStorage.getItem(savedKey(ledger))||sessionStorage.getItem(savedKey(ledger));if(t)await openSection(t,ledger);else loginView()})();
-$('loginLedger').onchange=()=>{ledger=$('loginLedger').value;localStorage.setItem('am_finanze_preferred',ledger)};
+$('loginLedger').onchange=()=>{ledger=$('loginLedger').value;localStorage.setItem('am_finanze_preferred',ledger);refreshSetup()};
 </script></body></html>
