@@ -23,6 +23,20 @@
  <p id="activationError" class="notice hide" role="alert"></p>
 </div>
 <button type="button" class="alt" id="showPersonalSetup" style="margin-top:10px">Attiva per la prima volta Personale Angela</button>
+<button type="button" class="alt" id="forgotPersonal" style="margin-top:10px">Password dimenticata? Personale Angela</button>
+<div id="recoverPersonalPanel" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
+<h3>Reimposta password Personale Angela</h3>
+<p class="muted">Per proteggere i dati, conferma la password aziendale Aerial Move e scegli una nuova password personale. Nessuna email necessaria.</p>
+<label for="recoverCompanyPass">Password Aerial Move</label>
+<input id="recoverCompanyPass" type="password" autocomplete="off" placeholder="Password della sezione Aerial Move">
+<label for="recoverNewPersonalPass">Nuova password personale</label>
+<input id="recoverNewPersonalPass" type="password" autocomplete="new-password" minlength="10" placeholder="Almeno 10 caratteri">
+<label for="recoverConfirmPersonalPass">Conferma nuova password personale</label>
+<input id="recoverConfirmPersonalPass" type="password" autocomplete="new-password" minlength="10">
+<button type="button" id="confirmPersonalRecovery" class="full" style="margin-top:15px">Reimposta la password personale</button>
+<button type="button" id="cancelPersonalRecovery" class="alt" style="margin-top:9px">Annulla</button>
+<p id="recoverPersonalError" class="notice hide" role="alert"></p>
+</div>
 <div id="error" role="alert" class="notice hide"></div>
 </section>
 <section id="dashboard" class="hide">
@@ -58,8 +72,59 @@ async function openSection(t,l){token=t;ledger=l;$('dashboard').classList.remove
 async function signIn(l,p){$('loginButton').disabled=true;$('error').classList.add('hide');if(p.length<8){message('Inserisci la password della sezione.');$('loginButton').disabled=false;return}try{const{data,error}=await db.rpc('finanze_login_direct',{p_ledger:l,p_password:p});if(error)throw error;if(!data){message('Password non riconosciuta o accesso temporaneamente limitato. Se conosci la password di Aerial Move, seleziona quella sezione.');return}if($('remember').checked)localStorage.setItem(savedKey(l),data);else sessionStorage.setItem(savedKey(l),data);await openSection(data,l)}catch(e){message('Accesso non riuscito: '+e.message)}finally{$('loginButton').disabled=false}}
 $('loginButton').onclick=()=>signIn($('loginLedger').value,$('loginPass').value);
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')signIn($('loginLedger').value,$('loginPass').value)});
-function refreshSetup(){const personal=$('loginLedger').value==='personale';$('showPersonalSetup').classList.toggle('hide',!personal);if(!personal)$('personalFirstSetup').classList.add('hide')}
-$('showPersonalSetup').onclick=()=>{$('personalFirstSetup').classList.toggle('hide');$('activationError').classList.add('hide')};
+function refreshSetup(){
+const personal=$('loginLedger').value==='personale';
+$('showPersonalSetup').classList.toggle('hide',!personal);
+$('forgotPersonal').classList.toggle('hide',!personal);
+if(!personal){$('personalFirstSetup').classList.add('hide');$('recoverPersonalPanel').classList.add('hide')}
+}
+$('showPersonalSetup').onclick=()=>{$('recoverPersonalPanel').classList.add('hide');$('personalFirstSetup').classList.toggle('hide');$('activationError').classList.add('hide')};
+$('forgotPersonal').onclick=()=>{
+$('personalFirstSetup').classList.add('hide');
+$('recoverPersonalPanel').classList.toggle('hide');
+$('recoverPersonalError').classList.add('hide');
+};
+$('cancelPersonalRecovery').onclick=()=>{
+$('recoverPersonalPanel').classList.add('hide');
+$('recoverCompanyPass').value='';
+$('recoverNewPersonalPass').value='';
+$('recoverConfirmPersonalPass').value='';
+};
+$('confirmPersonalRecovery').onclick=async()=>{
+ const biz=$('recoverCompanyPass').value;
+ const personal=$('recoverNewPersonalPass').value;
+ const confirmation=$('recoverConfirmPersonalPass').value;
+ const fail=m=>{$('recoverPersonalError').textContent=m;$('recoverPersonalError').classList.remove('hide')};
+ $('recoverPersonalError').classList.add('hide');
+ if(biz.length<8)return fail('Inserisci la password di Aerial Move.');
+ if(personal.length<10)return fail('La nuova password personale deve avere almeno 10 caratteri.');
+ if(personal!==confirmation)return fail('Le due nuove password non coincidono.');
+ if(personal===biz)return fail('La password personale deve essere diversa da quella aziendale.');
+ $('confirmPersonalRecovery').disabled=true;
+ let temporaryToken=null;
+ try{
+  const result=await db.rpc('finanze_login_direct',{p_ledger:'azienda',p_password:biz});
+  if(result.error)throw result.error;
+  if(!result.data){fail('Password Aerial Move non riconosciuta o troppi tentativi. Attendi 15 minuti prima di riprovare.');return}
+  temporaryToken=result.data;
+  const reset=await db.rpc('finanze_reset_personal_by_azienda',{p_token:temporaryToken,p_new_password:personal});
+  if(reset.error)throw reset.error;
+  if(!reset.data){fail('Reimpostazione non riuscita. Verifica che la nuova password sia diversa da quella aziendale.');return}
+  localStorage.removeItem(savedKey('personale'));
+  sessionStorage.removeItem(savedKey('personale'));
+  $('recoverCompanyPass').value='';
+  $('recoverNewPersonalPass').value='';
+  $('recoverConfirmPersonalPass').value='';
+  $('recoverPersonalPanel').classList.add('hide');
+  say('Password personale reimpostata. Accesso in corso…');
+  await signIn('personale',personal);
+ }catch(e){fail('Impossibile reimpostare la password: '+(e?.message||'Errore'))}
+ finally{
+  if(temporaryToken){await db.rpc('finanze_direct_logout',{p_token:temporaryToken}).catch(()=>{})}
+  $('confirmPersonalRecovery').disabled=false;
+ }
+};
+
 $('activatePersonal').onclick=async()=>{
  const biz=$('setupCompanyPass').value,pass=$('setupPersonalPass').value,confirm=$('setupPersonalConfirm').value;
  const fail=m=>{$('activationError').textContent=m;$('activationError').classList.remove('hide')};
