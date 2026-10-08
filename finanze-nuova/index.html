@@ -44,6 +44,22 @@
 .budget-settings-grid input{max-width:100%}
 .budget-note{font-size:12px;color:#776b76;line-height:1.5}
 @media(max-width:360px){.budget-hero,.budget-settings-grid{grid-template-columns:1fr}}
+
+.credit-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.credit-summary-box{background:#f8eff6;padding:11px;border-radius:13px;min-width:0}
+.credit-summary-box span{display:block;font-size:11px;color:#705c6d;line-height:1.3}
+.credit-summary-box strong{display:block;font-size:17px;font-variant-numeric:tabular-nums;margin-top:6px;overflow-wrap:anywhere}
+.credit-summary-box.emphasis{background:#f0e2ee}
+.credit-track{width:100%;height:9px;background:#ecdfeb;border-radius:20px;overflow:hidden}
+#creditProgress{width:0%;height:100%;background:#822d6d;border-radius:20px;transition:width .18s ease-out}
+.credit-subtitle{font-size:15px;margin:20px 0 10px}
+.credit-breakdown-line,.credit-history-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #eee1eb;align-items:start}
+.credit-breakdown-line:last-child,.credit-history-line:last-child{border-bottom:0}
+.credit-breakdown-line .credit-name,.credit-history-line .credit-name{font-weight:620;font-size:14px}
+.credit-amount{font-weight:720;white-space:nowrap;font-variant-numeric:tabular-nums}
+.credit-detail{font-size:12px;color:#796d78;margin-top:4px}
+.credit-history{margin-top:10px}
+@media(max-width:390px){.credit-summary-box{padding:8px}.credit-summary-box strong{font-size:15px}}
 </style></head><body>
 <header><div class="row"><div><h1>✦ Aerial Move Finanze</h1><div class="hero">Entrate · Uscite · Piano di accumulo</div></div><div class="row" id="topright"><button type="button" class="alt" id="refresh">↻ Aggiorna</button><button type="button" class="alt hide" id="logout">Esci</button></div></div></header>
 <main class="wrap">
@@ -116,7 +132,25 @@
 </div></div>
 <div class="card"><h3>In breve</h3><div class="insights-list" id="insights"></div><p class="muted" id="appUpdated"></p></div>
 <div class="card"><h3>Curva di accumulo</h3><p class="muted">Progressione delle entrate meno le uscite effettivamente registrate. Non rappresenta il saldo del conto bancario.</p><canvas id="graph" width="740" height="215"></canvas></div>
-<div class="card" id="creditPanel"><h3>Credito Angela verso Aerial Move</h3><div class="row"><div><div class="muted">Anticipi personali documentati</div><div style="font-size:25px;font-weight:750">1.512 €</div></div><div><div class="muted">Da rimborsare (stimato)</div><div style="font-size:25px;font-weight:750" id="creditDue">1.512 €</div></div></div><p class="muted">I rimborsi effettuati con categoria “Rimborso Angela” riducono il credito di questa sezione. Registra il movimento corrispondente anche nell'altra gestione.</p></div>
+<div class="card" id="creditPanel">
+<h3 id="creditHeading">Credito Angela verso Aerial Move</h3>
+<p class="muted" id="creditIntro">Riepilogo degli anticipi personali che Aerial Move deve restituire ad Angela. Questo credito non è un'entrata già incassata.</p>
+<div class="credit-summary">
+ <div class="credit-summary-box"><span>Totale anticipato</span><strong id="creditTotal">1.512,00 €</strong></div>
+ <div class="credit-summary-box"><span id="creditPaidLabel">Già rimborsato</span><strong id="creditPaid">0,00 €</strong></div>
+ <div class="credit-summary-box emphasis"><span id="creditRemainingLabel">Ancora da ricevere</span><strong id="creditDue">1.512,00 €</strong></div>
+</div>
+<div class="credit-track" aria-label="Avanzamento del rimborso"><div id="creditProgress"></div></div>
+<p class="muted" id="creditProgressCaption">0% rimborsato</p>
+<h4 class="credit-subtitle">Da cosa è composto il credito</h4>
+<div id="creditBreakdown" class="credit-breakdown"></div>
+<div class="credit-history">
+ <h4 class="credit-subtitle" id="creditHistoryHeading">Rimborsi già ricevuti</h4>
+ <div id="creditHistory" class="credit-history-list"></div>
+</div>
+<button type="button" id="recordCreditPayment" class="alt" style="margin-top:13px">+ Registra rimborso ricevuto</button>
+<p class="muted" id="creditFootnote">Registra un rimborso solo quando i soldi arrivano davvero. La voce iniziale da 1.512 € rimane un credito da incassare, non va segnata come incassata insieme ai rimborsi parziali.</p>
+</div>
 <div class="card" id="setupPanel"><h3>Attiva la sezione Personale</h3><p class="muted">La sezione personale non ha ancora una password registrata. Creane una distinta da quella aziendale (minimo 10 caratteri). Puoi farlo soltanto dopo essere entrata con la password Aerial Move.</p><label for="personalPass">Nuova password personale</label><input type="password" id="personalPass" autocomplete="new-password" placeholder="Nuova password personale"><button type="button" class="full" id="setupPersonal" style="margin-top:12px">Attiva Personale</button></div>
 <div class="card"><h3 id="formTitle">Nuovo movimento</h3><form id="form"><input type="hidden" id="editId"><div class="grid">
 <div><label for="date">Data</label><input id="date" type="date" required></div>
@@ -246,7 +280,7 @@ setInterval(refreshDataQuietly,90000);
 function sum(a,p){return a.filter(p).reduce((v,r)=>v+Number(r.amount),0)}
 function render(){const month=$('month').value;const r=rows.filter(x=>x.entry_date.slice(0,7)===month);const inPaid=sum(r,x=>x.direction==='entrata'&&x.status==='pagato'),outPaid=sum(r,x=>x.direction==='uscita'&&x.status==='pagato'),inDue=sum(r,x=>x.direction==='entrata'&&x.status==='previsto'&&x.category!=='Rimborso Angela'),outDue=sum(r,x=>x.direction==='uscita'&&x.status==='previsto'&&x.category!=='Rimborso Angela');
 $('metrics').innerHTML=[['Entrate incassate',inPaid],['Spese pagate',outPaid],['Ancora da pagare',outDue],['Saldo registrato',inPaid-outPaid]].map(([name,value])=>'<div class="metric"><span>'+name+'</span><b>'+euros(value)+'</b></div>').join('');
-const pay=sum(rows,x=>x.category==='Rimborso Angela'&&x.status==='pagato'&&x.direction===(ledger==='azienda'?'uscita':'entrata'));$('creditDue').textContent=euros(Math.max(0,1512-pay));
+renderCreditPanel();
 $('items').replaceChildren();let items=rows.filter(x=>filter==='all'||(filter==='due'?x.status==='previsto':x.status==='pagato'));if(!items.length)$('items').textContent='Non ci sono movimenti in questa sezione.';
 for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month);renderVisuals(r);renderBudget(r)}
 $('month').onchange=async()=>{monthlyBudget=emptyBudget();render();await loadBudgetSettings();render()};
@@ -424,6 +458,84 @@ function renderBudget(monthRows){
  (b.cap!==null?' · massimo spese '+euros(b.cap):'')+
  ' − '+euros(b.committed)+' di spese pagate e previste. I rimborsi Angela ancora da ricevere/pagare sono mostrati a parte.';
 }
+
+const creditAdvances=[
+ {title:'Anticipo per istruttrici',amount:600},
+ {title:'Statuto',amount:200},
+ {title:'Workshop',amount:388},
+ {title:'Fatture',amount:174},
+ {title:'Bungee',amount:150}
+];
+const creditTotalAmount=creditAdvances.reduce((total,item)=>total+item.amount,0);
+function creditedReimbursements(){
+ return rows.filter(item=>item.category==='Rimborso Angela'
+  && item.status==='pagato'
+  && item.direction===(ledger==='azienda'?'uscita':'entrata'));
+}
+function renderCreditPanel(){
+ const isPersonal=ledger==='personale';
+ const paidItems=creditedReimbursements();
+ const paid=sum(paidItems,()=>true);
+ const remaining=Math.max(0,creditTotalAmount-paid);
+ $('creditHeading').textContent=isPersonal?'Soldi che Aerial Move deve ad Angela':'Debito Aerial Move verso Angela';
+ $('creditIntro').textContent=isPersonal
+  ? 'Questi sono i soldi personali anticipati per Aerial Move. Sono un credito da recuperare, non denaro già incassato.'
+  : 'Anticipi sostenuti da Angela per Aerial Move. Il totale è un debito da restituire, non una nuova spesa duplicata.';
+ $('creditPaidLabel').textContent=isPersonal?'Già ricevuto':'Già restituito';
+ $('creditRemainingLabel').textContent=isPersonal?'Ancora da ricevere':'Ancora da restituire';
+ $('creditTotal').textContent=euros(creditTotalAmount);
+ $('creditPaid').textContent=euros(paid);
+ $('creditDue').textContent=euros(remaining);
+ const percent=Math.min(100,paid/creditTotalAmount*100);
+ $('creditProgress').style.width=percent.toFixed(1)+'%';
+ $('creditProgressCaption').textContent=percent.toLocaleString('it-IT',{maximumFractionDigits:1})+'% rimborsato';
+ const breakdown=$('creditBreakdown');breakdown.replaceChildren();
+ for(const advance of creditAdvances){
+  const line=document.createElement('div');line.className='credit-breakdown-line';
+  const title=document.createElement('span');title.className='credit-name';title.textContent=advance.title;
+  const amount=document.createElement('span');amount.className='credit-amount';amount.textContent=euros(advance.amount);
+  line.append(title,amount);breakdown.append(line);
+ }
+ const history=$('creditHistory');history.replaceChildren();
+ $('creditHistoryHeading').textContent=isPersonal?'Rimborsi già ricevuti':'Rimborsi già versati';
+ if(!paidItems.length){
+  const placeholder=document.createElement('p');placeholder.className='muted';
+  placeholder.textContent='Nessun rimborso segnato come effettuato in questa sezione.';
+  history.append(placeholder);
+ }else{
+  for(const payment of [...paidItems].sort((a,b)=>b.entry_date.localeCompare(a.entry_date))){
+   const line=document.createElement('div');line.className='credit-history-line';
+   const info=document.createElement('div');
+   const title=document.createElement('div');title.className='credit-name';title.textContent=payment.title;
+   const date=document.createElement('div');date.className='credit-detail';
+   date.textContent=new Date(payment.entry_date+'T12:00:00').toLocaleDateString('it-IT');
+   info.append(title,date);
+   const amount=document.createElement('span');amount.className='credit-amount';amount.textContent=euros(payment.amount);
+   line.append(info,amount);history.append(line);
+  }
+ }
+ $('recordCreditPayment').textContent=isPersonal?'+ Registra rimborso ricevuto':'+ Registra rimborso versato';
+ $('creditFootnote').textContent=isPersonal
+  ? 'Registra solo i soldi realmente ricevuti. La riga iniziale del credito da 1.512 € va lasciata prevista: non segnarla come incassata insieme ai rimborsi parziali.'
+  : 'Segna soltanto i rimborsi realmente versati e registra il movimento corrispondente anche nella sezione Personale Angela.';
+}
+$('recordCreditPayment').onclick=()=>{
+ const paid=sum(creditedReimbursements(),()=>true);
+ const remaining=Math.max(0,creditTotalAmount-paid);
+ if(remaining<=0){say('Il credito risulta già rimborsato completamente.');return}
+ reset();
+ $('date').value=today;
+ $('direction').value=ledger==='personale'?'entrata':'uscita';
+ $('status').value='pagato';
+ $('category').value='Rimborso Angela';
+ $('title').value=ledger==='personale'?'Rimborso ricevuto da Aerial Move':'Rimborso versato ad Angela';
+ $('notes').value='Rimborso degli anticipi di Angela per Aerial Move; residuo prima di questo rimborso: '+euros(remaining);
+ $('amount').value='';
+ $('formTitle').textContent=ledger==='personale'?'Registra rimborso ricevuto':'Registra rimborso versato';
+ $('form').scrollIntoView({behavior:'smooth'});
+ $('amount').focus();
+};
+
 function edit(r){$('editId').value=r.id;$('date').value=r.entry_date;$('amount').value=r.amount;$('title').value=r.title;$('category').value=r.category;$('notes').value=r.notes||'';$('direction').value=r.direction;$('status').value=r.status;$('formTitle').textContent='Modifica movimento';$('form').scrollIntoView({behavior:'smooth'})}
 function reset(){$('form').reset();$('editId').value='';$('date').value=today;$('formTitle').textContent='Nuovo movimento'}$('cancel').onclick=reset;
 $('form').onsubmit=async ev=>{ev.preventDefault();const rec={id:$('editId').value||null,entry_date:$('date').value,title:$('title').value.trim(),category:$('category').value,notes:$('notes').value,amount:Number($('amount').value),direction:$('direction').value,status:$('status').value};if(!rec.title||!(rec.amount>0)){say('Inserisci descrizione e importo valido');return}try{$('save').disabled=true;const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:rec});if(error)throw error;reset();await load();say('Movimento salvato')}catch(e){say(e.message)}finally{$('save').disabled=false}};
