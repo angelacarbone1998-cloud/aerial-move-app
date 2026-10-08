@@ -26,6 +26,24 @@
 .insight-note{font-size:12px;color:#756474;line-height:1.4;margin-top:4px}
 #appUpdated{font-size:12px;color:#796976;margin-top:10px}
 @media(min-width:620px){.charts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.insights-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* budget, soglie e avvisi */
+.budget-hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.budget-stat{padding:13px;border-radius:14px;background:#f6eef5;border:1px solid #eadce7;min-width:0}
+.budget-stat.primary{background:#f4e5f0;border-color:#ddc4d6}
+.budget-stat .k{display:block;color:#715a6c;font-size:12px}
+.budget-stat strong{display:block;font-size:22px;line-height:1.2;margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.budget-alert{margin:12px 0;border-radius:13px;padding:13px 14px;border:1px solid transparent;font-size:14px}
+.budget-alert strong{display:block;margin-bottom:5px}.budget-alert.danger{background:#ffedf0;border-color:#ecb4c0;color:#9c263f}
+.budget-alert.warn{background:#fff4da;border-color:#f1dba3;color:#815a12}
+.budget-alert.good{background:#ebf6ef;border-color:#cbe6d5;color:#165e37}
+.budget-alert small{display:block;line-height:1.4;margin-top:5px}
+.budget-settings{margin-top:14px;border-top:1px solid #e9dee6;padding-top:9px}
+.budget-settings summary{cursor:pointer;font-size:14px;color:#72245c;font-weight:700;padding:9px 0}
+.budget-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 13px}
+.budget-settings-grid input{max-width:100%}
+.budget-note{font-size:12px;color:#776b76;line-height:1.5}
+@media(max-width:360px){.budget-hero,.budget-settings-grid{grid-template-columns:1fr}}
 </style></head><body>
 <header><div class="row"><div><h1>✦ Aerial Move Finanze</h1><div class="hero">Entrate · Uscite · Piano di accumulo</div></div><div class="row" id="topright"><button type="button" class="alt" id="refresh">↻ Aggiorna</button><button type="button" class="alt hide" id="logout">Esci</button></div></div></header>
 <main class="wrap">
@@ -65,6 +83,28 @@
 <div class="row" style="margin-bottom:8px"><h2 id="sectionTitle">Aerial Move</h2><button type="button" class="alt" id="switch">Cambia sezione</button></div>
 <div class="card"><div class="row"><h3>Riepilogo mensile</h3><input type="month" id="month" style="width:160px"></div>
 <div class="grid" id="metrics"></div><p class="muted">Il saldo riguarda i movimenti segnati come effettuati; non sostituisce il saldo bancario.</p></div>
+<div class="card" id="budgetCard">
+ <div class="dashboard-heading"><h3>Quanto puoi spendere questo mese?</h3><small id="budgetMonth"></small></div>
+ <p class="muted">Stima basata su entrate incassate e previste, uscite già pagate e pagamenti ancora da fare. Non corrisponde al saldo bancario.</p>
+ <div id="budgetAlert" class="budget-alert good" role="status" aria-live="polite"></div>
+ <div class="budget-hero">
+  <div class="budget-stat"><span class="k">Budget totale del mese</span><strong id="budgetTotal">0 €</strong></div>
+  <div class="budget-stat"><span class="k">Già speso o impegnato</span><strong id="budgetCommitted">0 €</strong></div>
+  <div class="budget-stat primary"><span class="k">Puoi ancora spendere</span><strong id="budgetRemaining">0 €</strong></div>
+  <div class="budget-stat"><span class="k">Entrate del mese (anche previste)</span><strong id="budgetIncome">0 €</strong></div>
+ </div>
+ <p class="budget-note" id="budgetFormula"></p>
+ <details class="budget-settings" id="budgetOptions">
+  <summary>Imposta risparmio, limite e avvisi</summary>
+  <p class="budget-note">Impostazioni indipendenti per ciascun mese e per ciascuna sezione. Si salvano online.</p>
+  <form id="budgetForm"><div class="budget-settings-grid">
+   <div><label for="budgetOpening">Fondi disponibili a inizio mese (€)</label><input id="budgetOpening" type="number" step="0.01" placeholder="0" required></div>
+   <div><label for="budgetReserve">Somma da tenere da parte (€)</label><input id="budgetReserve" type="number" step="0.01" min="0" placeholder="0" required></div>
+   <div><label for="budgetThreshold">Soglia di avviso: avvisami sotto (€)</label><input id="budgetThreshold" type="number" step="0.01" min="0" placeholder="100" required></div>
+   <div><label for="budgetCap">Limite massimo spese del mese (€)</label><input id="budgetCap" type="number" step="0.01" min="0" placeholder="Facoltativo"></div>
+  </div><button type="submit" id="saveBudget" style="margin-top:13px">Salva budget e avvisi</button></form>
+ </details>
+</div>
 <div class="card" id="visualDashboard">
 <div class="dashboard-heading"><h3>Le tue finanze a colpo d'occhio</h3><small id="chartsMonth"></small></div>
 <p class="muted">Grafici calcolati automaticamente dai movimenti del mese. I pagamenti effettuati sono distinti da quelli previsti.</p>
@@ -96,11 +136,13 @@ const $=id=>document.getElementById(id);
 const euros=n=>Number(n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const today=new Date().toLocaleDateString('en-CA');$('month').value=today.slice(0,7);$('date').value=today;
 let ledger='azienda',token='',rows=[],filter='all',remember=true;
+const emptyBudget=()=>({opening_funds:0,reserve_amount:0,alert_threshold:100,spending_cap:null});
+let monthlyBudget=emptyBudget();
 let toastTimer;function say(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',5200)}
 function message(s){$('error').textContent=s;$('error').classList.remove('hide')}
 function loginView(){token='';rows=[];$('loginCard').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');$('loginButton').disabled=false;$('loginPass').value='';$('loginLedger').value=ledger;$('error').classList.add('hide');refreshSetup()}
 function savedKey(l){return 'am_finanze_v2_'+l}
-async function openSection(t,l){token=t;ledger=l;$('dashboard').classList.remove('hide');$('loginCard').classList.add('hide');$('logout').classList.remove('hide');$('sectionTitle').textContent=l==='azienda'?'Aerial Move':'Personale Angela';$('setupPanel').classList.toggle('hide',l!=='azienda');filter='all';await load()}
+async function openSection(t,l){token=t;ledger=l;monthlyBudget=emptyBudget();$('dashboard').classList.remove('hide');$('loginCard').classList.add('hide');$('logout').classList.remove('hide');$('sectionTitle').textContent=l==='azienda'?'Aerial Move':'Personale Angela';$('setupPanel').classList.toggle('hide',l!=='azienda');filter='all';await load()}
 async function signIn(l,p){$('loginButton').disabled=true;$('error').classList.add('hide');if(p.length<8){message('Inserisci la password della sezione.');$('loginButton').disabled=false;return}try{const{data,error}=await db.rpc('finanze_login_direct',{p_ledger:l,p_password:p});if(error)throw error;if(!data){message('Password non riconosciuta o accesso temporaneamente limitato. Se conosci la password di Aerial Move, seleziona quella sezione.');return}if($('remember').checked)localStorage.setItem(savedKey(l),data);else sessionStorage.setItem(savedKey(l),data);await openSection(data,l)}catch(e){message('Accesso non riuscito: '+e.message)}finally{$('loginButton').disabled=false}}
 $('loginButton').onclick=()=>signIn($('loginLedger').value,$('loginPass').value);
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')signIn($('loginLedger').value,$('loginPass').value)});
@@ -190,7 +232,7 @@ async function logout(){if(token)await db.rpc('finanze_direct_logout',{p_token:t
 $('logout').onclick=logout;$('switch').onclick=async()=>{let other=ledger==='azienda'?'personale':'azienda';let t=localStorage.getItem(savedKey(other))||sessionStorage.getItem(savedKey(other));if(t){await openSection(t,other)}else{ledger=other;loginView()}}
 $('refresh').onclick=()=>{const u=new URL(location.href);u.searchParams.set('v',String(Date.now()));location.replace(u.href)};
 $('setupPersonal').onclick=async()=>{const p=$('personalPass').value;if(p.length<10){say('Usa una password personale di almeno 10 caratteri');return}const{data,error}=await db.rpc('finanze_initialize_personal',{p_token:token,p_new_password:p});$('personalPass').value='';if(error){say(error.message);return}if(!data){say('La password personale potrebbe essere già stata impostata. Usa Cambia sezione per accedere.');return}$('setupPanel').classList.add('hide');say('Accesso Personale attivato! Premi Cambia sezione e inserisci la nuova password.')}
-async function load(){try{const{data,error}=await db.rpc('finanze_direct_read',{p_token:token});if(error)throw error;rows=data||[];lastSync=Date.now();render()}catch(e){localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView();message('Sessione scaduta. Inserisci di nuovo la password della sezione.');}}
+async function load(){try{const{data,error}=await db.rpc('finanze_direct_read',{p_token:token});if(error)throw error;rows=data||[];await loadBudgetSettings();lastSync=Date.now();render()}catch(e){localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView();message('Sessione scaduta. Inserisci di nuovo la password della sezione.');}}
 
 let lastSync=0,updating=false;
 async function refreshDataQuietly(){
@@ -206,8 +248,8 @@ function render(){const month=$('month').value;const r=rows.filter(x=>x.entry_da
 $('metrics').innerHTML=[['Entrate incassate',inPaid],['Spese pagate',outPaid],['Ancora da pagare',outDue],['Saldo registrato',inPaid-outPaid]].map(([name,value])=>'<div class="metric"><span>'+name+'</span><b>'+euros(value)+'</b></div>').join('');
 const pay=sum(rows,x=>x.category==='Rimborso Angela'&&x.status==='pagato'&&x.direction===(ledger==='azienda'?'uscita':'entrata'));$('creditDue').textContent=euros(Math.max(0,1512-pay));
 $('items').replaceChildren();let items=rows.filter(x=>filter==='all'||(filter==='due'?x.status==='previsto':x.status==='pagato'));if(!items.length)$('items').textContent='Non ci sono movimenti in questa sezione.';
-for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month);renderVisuals(r)}
-$('month').onchange=render;
+for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month);renderVisuals(r);renderBudget(r)}
+$('month').onchange=async()=>{monthlyBudget=emptyBudget();render();await loadBudgetSettings();render()};
 [['filterAll','all'],['filterDue','due'],['filterPaid','paid']].forEach(([id,value])=>$(id).onclick=()=>{filter=value;render()});
 function draw(month){const c=$('graph'),ctx=c.getContext('2d');const yy=month.slice(0,4);let acc=0;const labels=Array.from({length:12},(_,i)=>yy+'-'+String(i+1).padStart(2,'0')),vals=labels.map(m=>{acc+=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='entrata');acc-=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='uscita');return acc});const min=Math.min(0,...vals),max=Math.max(1,...vals);ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle='#e5d8e2';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=20+i*50;ctx.beginPath();ctx.moveTo(55,y);ctx.lineTo(730,y);ctx.stroke()}ctx.strokeStyle='#8e2a70';ctx.lineWidth=4;ctx.beginPath();vals.forEach((v,i)=>{const x=62+i*60,y=177-(v-min)/(max-min)*150;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.fillStyle='#766476';ctx.font='13px Arial';labels.forEach((m,i)=>{if(i%2===0)ctx.fillText(m.slice(5),57+i*60,210)});ctx.fillText(euros(max),2,14);ctx.fillText(euros(min),2,186)}
 
@@ -297,6 +339,90 @@ function renderVisuals(monthRows){
  if(ledger==='azienda')notes.append(insight('Angela: ancora da rimborsare',euros(creditPending),'Credito registrato separatamente dai costi ordinari'));
  else notes.append(insight('Credito verso Aerial Move',euros(creditPending),'Da incassare solo quando Aerial Move effettua il rimborso'));
  $('appUpdated').textContent='Dati aggiornati: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+' · ogni nuovo movimento aggiorna automaticamente i grafici.';
+}
+
+async function loadBudgetSettings(){
+ const l=ledger,m=$('month').value,t=token;
+ try{
+  const {data,error}=await db.rpc('finanze_budget_read',{p_token:t,p_month:m});
+  if(error)throw error;
+  if(t!==token||l!==ledger||m!==$('month').value)return;
+  monthlyBudget={
+   opening_funds:Number(data?.opening_funds??0),
+   reserve_amount:Number(data?.reserve_amount??0),
+   alert_threshold:Number(data?.alert_threshold??100),
+   spending_cap:data?.spending_cap===null||data?.spending_cap===undefined?null:Number(data.spending_cap)
+  };
+  $('budgetOpening').value=monthlyBudget.opening_funds;
+  $('budgetReserve').value=monthlyBudget.reserve_amount;
+  $('budgetThreshold').value=monthlyBudget.alert_threshold;
+  $('budgetCap').value=monthlyBudget.spending_cap===null?'':monthlyBudget.spending_cap;
+ }catch(err){say('Budget: impostazioni non caricate. '+err.message)}
+}
+$('budgetForm').onsubmit=async event=>{
+ event.preventDefault();
+ const vals=['budgetOpening','budgetReserve','budgetThreshold'].map(id=>Number($(id).value));
+ const raw=$('budgetCap').value.trim();
+ const cap=raw===''?null:Number(raw);
+ if(vals.some(x=>!Number.isFinite(x))||vals[1]<0||vals[2]<0||(cap!==null&&(!Number.isFinite(cap)||cap<0))){
+  say('Controlla le cifre nelle impostazioni del budget.');return;
+ }
+ $('saveBudget').disabled=true;
+ try{
+  const {data,error}=await db.rpc('finanze_budget_save',{
+    p_token:token,p_month:$('month').value,p_opening_funds:vals[0],
+    p_reserve_amount:vals[1],p_alert_threshold:vals[2],p_spending_cap:cap
+  });
+  if(error)throw error;
+  monthlyBudget={
+    opening_funds:Number(data.opening_funds),reserve_amount:Number(data.reserve_amount),
+    alert_threshold:Number(data.alert_threshold),
+    spending_cap:data.spending_cap===null?null:Number(data.spending_cap)
+  };
+  render();say('Budget e soglia di avviso salvati.');
+ }catch(err){say('Non è stato possibile salvare: '+err.message)}
+ finally{$('saveBudget').disabled=false}
+};
+function calculateMonthlyBudget(monthRows,settings){
+ const incomes=incomeRows(monthRows),expenses=expenseRows(monthRows);
+ const projectedIncome=sum(incomes,()=>true);
+ const committed=sum(expenses,()=>true);
+ const opening=Number(settings.opening_funds)||0;
+ const reserve=Number(settings.reserve_amount)||0;
+ const threshold=Number(settings.alert_threshold)||0;
+ const cap=settings.spending_cap===null?null:Number(settings.spending_cap);
+ const resourceBudget=opening+projectedIncome-reserve;
+ const totalBudget=cap===null?resourceBudget:Math.min(resourceBudget,cap);
+ const left=totalBudget-committed;
+ const state=left<0?'danger':left<=threshold?'warn':'good';
+ return {projectedIncome,committed,opening,reserve,threshold,cap,totalBudget,left,state};
+}
+function renderBudget(monthRows){
+ const b=calculateMonthlyBudget(monthRows,monthlyBudget);
+ $('budgetMonth').textContent=new Date($('month').value+'-02T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+ $('budgetTotal').textContent=euros(Math.max(0,b.totalBudget));
+ $('budgetCommitted').textContent=euros(b.committed);
+ $('budgetRemaining').textContent=euros(Math.max(0,b.left));
+ $('budgetIncome').textContent=euros(b.projectedIncome);
+ const alert=$('budgetAlert');
+ alert.className='budget-alert '+b.state;
+ alert.replaceChildren();
+ const heading=document.createElement('strong'),info=document.createElement('small');
+ if(b.state==='danger'){
+  heading.textContent='🔴 Attenzione: scoperto previsto di '+euros(-b.left);
+  info.textContent='Le uscite impegnate e la somma da accantonare superano le risorse stimate. Aggiungi eventuali entrate non registrate oppure rivedi spese e scadenze.';
+ }else if(b.state==='warn'){
+  heading.textContent='🟡 Preavviso: rimangono '+euros(b.left);
+  info.textContent='Hai raggiunto la soglia di attenzione impostata ('+euros(b.threshold)+'). Valuta le prossime spese.';
+ }else{
+  heading.textContent='🟢 Budget sotto controllo: rimangono '+euros(b.left);
+  info.textContent='Disponibilità stimata dopo le spese già pagate, quelle previste e le somme accantonate.';
+ }
+ alert.append(heading,info);
+ $('budgetFormula').textContent='Calcolo: '+euros(b.opening)+' fondi a inizio mese + '+euros(b.projectedIncome)+
+ ' entrate (anche previste) − '+euros(b.reserve)+' da accantonare'+
+ (b.cap!==null?' · massimo spese '+euros(b.cap):'')+
+ ' − '+euros(b.committed)+' di spese pagate e previste. I rimborsi Angela ancora da ricevere/pagare sono mostrati a parte.';
 }
 function edit(r){$('editId').value=r.id;$('date').value=r.entry_date;$('amount').value=r.amount;$('title').value=r.title;$('category').value=r.category;$('notes').value=r.notes||'';$('direction').value=r.direction;$('status').value=r.status;$('formTitle').textContent='Modifica movimento';$('form').scrollIntoView({behavior:'smooth'})}
 function reset(){$('form').reset();$('editId').value='';$('date').value=today;$('formTitle').textContent='Nuovo movimento'}$('cancel').onclick=reset;
