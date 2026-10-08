@@ -4,6 +4,28 @@
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><title>Aerial Move Finanze</title>
 <style>
 :root{font-family:system-ui,-apple-system,Arial,sans-serif;background:#faf5f9;color:#271b2b}*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#73205e;color:white;padding:calc(20px + env(safe-area-inset-top)) 18px 20px}h1{font-size:24px;margin:0 0 4px}.wrap{max-width:820px;margin:auto;padding:16px;padding-bottom:80px}.muted{color:#766b75;font-size:13px;line-height:1.55}.hero{color:#fff;font-size:13px;opacity:.9}.card{background:#fff;border:1px solid #eadce8;border-radius:19px;margin:12px 0;padding:18px;box-shadow:0 2px 9px #59365808}h2{margin:0 0 12px;font-size:21px}h3{font-size:17px;margin:0 0 12px}label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}input,select{width:100%;font-size:16px;padding:13px;border-radius:11px;background:#fff;color:#281a29;border:1px solid #d7c4d3}button{background:#73205e;color:white;border:0;border-radius:12px;padding:13px 17px;font-weight:650;font-size:15px;cursor:pointer}button.alt{background:#f1e5ee;color:#652154}button.red{background:#fff0f1;color:#9b2b40}button:disabled{opacity:.5}button.full{width:100%}.row{display:flex;align-items:center;gap:9px;justify-content:space-between;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#f6eef4;padding:14px;border-radius:14px}.metric span{font-size:12px;color:#6f5d6a}.metric b{display:block;font-size:20px;margin-top:5px;word-break:break-word}.positive{color:#08774c}.negative{color:#ae3050}.tabs{display:flex;gap:8px;margin:10px 0}.tabs button{flex:1;padding:13px 4px}.item{border-top:1px solid #eee;padding:14px 0}.item:first-child{border-top:0}.item-main{display:flex;justify-content:space-between;gap:12px}.item-title{font-weight:640}.item-amount{font-weight:700;white-space:nowrap}.item-meta{font-size:12px;color:#736776;margin:4px 0 9px}.item-actions{display:flex;gap:8px}.item-actions button{padding:8px 11px;font-size:12px}.hide{display:none!important}.notice{border-left:3px solid #932b6e;background:#f7eaf2;padding:12px;margin:12px 0;border-radius:8px;font-size:13px;line-height:1.5}canvas{width:100%;height:190px}#toast{position:fixed;bottom:18px;left:18px;right:18px;max-width:790px;margin:auto;padding:14px 16px;border-radius:14px;background:#28192a;color:white;z-index:100;display:none}#topright{align-items:center}footer{text-align:center;font-size:12px;color:#998b96;padding-top:12px}@media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}h1{font-size:29px}} 
+
+/* Dashboard finanziaria mobile: grafici a ciambella accessibili */
+.dashboard-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.dashboard-heading h3{margin:0}.dashboard-heading small{color:#7d6e7a}
+.charts-grid{display:grid;grid-template-columns:1fr;gap:13px;margin-top:13px}
+.chart-tile{background:#fff;border:1px solid #eadce8;border-radius:16px;padding:14px;min-width:0}
+.chart-tile h4{font-size:15px;margin:0 0 4px}.chart-caption{font-size:12px;color:#796976;line-height:1.45;margin:0 0 13px;min-height:17px}
+.donut-layout{display:flex;gap:15px;align-items:center;flex-wrap:wrap;justify-content:center}
+.donut-ring{width:152px;height:152px;position:relative;flex:none;border-radius:50%;background:#eee5ec}
+.donut-hole{position:absolute;inset:29px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5px}
+.donut-hole b{font-size:17px;line-height:1.2}.donut-hole small{font-size:11px;color:#7a6b78}
+.donut-legend{flex:1;min-width:120px;width:100%;display:flex;flex-direction:column;gap:8px}
+.donut-legend-row{display:flex;gap:7px;align-items:flex-start;font-size:12px;justify-content:space-between}
+.legend-dot{flex:none;width:10px;height:10px;border-radius:4px;margin-top:3px}
+.legend-name{flex:1;overflow-wrap:anywhere;color:#493749}.legend-sum{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.insights-list{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.insight-tile{border-radius:12px;background:#f7f0f6;padding:12px 13px}
+.insight-title{display:block;font-size:12px;color:#756474;margin-bottom:5px}
+.insight-value{display:block;font-size:14px;font-weight:730;overflow-wrap:anywhere}
+.insight-note{font-size:12px;color:#756474;line-height:1.4;margin-top:4px}
+#appUpdated{font-size:12px;color:#796976;margin-top:10px}
+@media(min-width:620px){.charts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.insights-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body>
 <header><div class="row"><div><h1>✦ Aerial Move Finanze</h1><div class="hero">Entrate · Uscite · Piano di accumulo</div></div><div class="row" id="topright"><button type="button" class="alt" id="refresh">↻ Aggiorna</button><button type="button" class="alt hide" id="logout">Esci</button></div></div></header>
 <main class="wrap">
@@ -43,7 +65,17 @@
 <div class="row" style="margin-bottom:8px"><h2 id="sectionTitle">Aerial Move</h2><button type="button" class="alt" id="switch">Cambia sezione</button></div>
 <div class="card"><div class="row"><h3>Riepilogo mensile</h3><input type="month" id="month" style="width:160px"></div>
 <div class="grid" id="metrics"></div><p class="muted">Il saldo riguarda i movimenti segnati come effettuati; non sostituisce il saldo bancario.</p></div>
-<div class="card"><h3>Curva di accumulo</h3><canvas id="graph" width="740" height="215"></canvas></div>
+<div class="card" id="visualDashboard">
+<div class="dashboard-heading"><h3>Le tue finanze a colpo d'occhio</h3><small id="chartsMonth"></small></div>
+<p class="muted">Grafici calcolati automaticamente dai movimenti del mese. I pagamenti effettuati sono distinti da quelli previsti.</p>
+<div class="charts-grid">
+ <div class="chart-tile"><h4>Spese per categoria</h4><p class="chart-caption">Dove si concentrano le uscite del mese</p><div id="pieCategories"></div></div>
+ <div class="chart-tile"><h4>Pagato / da pagare</h4><p class="chart-caption">Stato delle spese registrate</p><div id="pieStatus"></div></div>
+ <div class="chart-tile"><h4>Entrate / uscite</h4><p class="chart-caption">Confronto dei movimenti del mese, previsti e realizzati</p><div id="pieFlow"></div></div>
+ <div class="chart-tile"><h4 id="pieExtraTitle">Riepilogo aggiuntivo</h4><p class="chart-caption" id="pieExtraDesc"></p><div id="pieExtra"></div></div>
+</div></div>
+<div class="card"><h3>In breve</h3><div class="insights-list" id="insights"></div><p class="muted" id="appUpdated"></p></div>
+<div class="card"><h3>Curva di accumulo</h3><p class="muted">Progressione delle entrate meno le uscite effettivamente registrate. Non rappresenta il saldo del conto bancario.</p><canvas id="graph" width="740" height="215"></canvas></div>
 <div class="card" id="creditPanel"><h3>Credito Angela verso Aerial Move</h3><div class="row"><div><div class="muted">Anticipi personali documentati</div><div style="font-size:25px;font-weight:750">1.512 €</div></div><div><div class="muted">Da rimborsare (stimato)</div><div style="font-size:25px;font-weight:750" id="creditDue">1.512 €</div></div></div><p class="muted">I rimborsi effettuati con categoria “Rimborso Angela” riducono il credito di questa sezione. Registra il movimento corrispondente anche nell'altra gestione.</p></div>
 <div class="card" id="setupPanel"><h3>Attiva la sezione Personale</h3><p class="muted">La sezione personale non ha ancora una password registrata. Creane una distinta da quella aziendale (minimo 10 caratteri). Puoi farlo soltanto dopo essere entrata con la password Aerial Move.</p><label for="personalPass">Nuova password personale</label><input type="password" id="personalPass" autocomplete="new-password" placeholder="Nuova password personale"><button type="button" class="full" id="setupPersonal" style="margin-top:12px">Attiva Personale</button></div>
 <div class="card"><h3 id="formTitle">Nuovo movimento</h3><form id="form"><input type="hidden" id="editId"><div class="grid">
@@ -158,16 +190,114 @@ async function logout(){if(token)await db.rpc('finanze_direct_logout',{p_token:t
 $('logout').onclick=logout;$('switch').onclick=async()=>{let other=ledger==='azienda'?'personale':'azienda';let t=localStorage.getItem(savedKey(other))||sessionStorage.getItem(savedKey(other));if(t){await openSection(t,other)}else{ledger=other;loginView()}}
 $('refresh').onclick=()=>{const u=new URL(location.href);u.searchParams.set('v',String(Date.now()));location.replace(u.href)};
 $('setupPersonal').onclick=async()=>{const p=$('personalPass').value;if(p.length<10){say('Usa una password personale di almeno 10 caratteri');return}const{data,error}=await db.rpc('finanze_initialize_personal',{p_token:token,p_new_password:p});$('personalPass').value='';if(error){say(error.message);return}if(!data){say('La password personale potrebbe essere già stata impostata. Usa Cambia sezione per accedere.');return}$('setupPanel').classList.add('hide');say('Accesso Personale attivato! Premi Cambia sezione e inserisci la nuova password.')}
-async function load(){try{const{data,error}=await db.rpc('finanze_direct_read',{p_token:token});if(error)throw error;rows=data||[];render()}catch(e){localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView();message('Sessione scaduta. Inserisci di nuovo la password della sezione.');}}
+async function load(){try{const{data,error}=await db.rpc('finanze_direct_read',{p_token:token});if(error)throw error;rows=data||[];lastSync=Date.now();render()}catch(e){localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView();message('Sessione scaduta. Inserisci di nuovo la password della sezione.');}}
+
+let lastSync=0,updating=false;
+async function refreshDataQuietly(){
+ if(!token||document.hidden||updating||Date.now()-lastSync<10000)return;
+ updating=true;
+ try{await load();lastSync=Date.now()}finally{updating=false}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDataQuietly()});
+window.addEventListener('focus',refreshDataQuietly);
+setInterval(refreshDataQuietly,90000);
 function sum(a,p){return a.filter(p).reduce((v,r)=>v+Number(r.amount),0)}
 function render(){const month=$('month').value;const r=rows.filter(x=>x.entry_date.slice(0,7)===month);const inPaid=sum(r,x=>x.direction==='entrata'&&x.status==='pagato'),outPaid=sum(r,x=>x.direction==='uscita'&&x.status==='pagato'),inDue=sum(r,x=>x.direction==='entrata'&&x.status==='previsto'&&x.category!=='Rimborso Angela'),outDue=sum(r,x=>x.direction==='uscita'&&x.status==='previsto'&&x.category!=='Rimborso Angela');
-$('metrics').innerHTML=[['Entrate ricevute',inPaid],['Uscite pagate',outPaid],['Spese previste',outDue],['Saldo movimenti',inPaid-outPaid]].map(([name,value])=>'<div class="metric"><span>'+name+'</span><b>'+euros(value)+'</b></div>').join('');
+$('metrics').innerHTML=[['Entrate incassate',inPaid],['Spese pagate',outPaid],['Ancora da pagare',outDue],['Saldo registrato',inPaid-outPaid]].map(([name,value])=>'<div class="metric"><span>'+name+'</span><b>'+euros(value)+'</b></div>').join('');
 const pay=sum(rows,x=>x.category==='Rimborso Angela'&&x.status==='pagato'&&x.direction===(ledger==='azienda'?'uscita':'entrata'));$('creditDue').textContent=euros(Math.max(0,1512-pay));
 $('items').replaceChildren();let items=rows.filter(x=>filter==='all'||(filter==='due'?x.status==='previsto':x.status==='pagato'));if(!items.length)$('items').textContent='Non ci sono movimenti in questa sezione.';
-for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month)}
+for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month);renderVisuals(r)}
 $('month').onchange=render;
 [['filterAll','all'],['filterDue','due'],['filterPaid','paid']].forEach(([id,value])=>$(id).onclick=()=>{filter=value;render()});
 function draw(month){const c=$('graph'),ctx=c.getContext('2d');const yy=month.slice(0,4);let acc=0;const labels=Array.from({length:12},(_,i)=>yy+'-'+String(i+1).padStart(2,'0')),vals=labels.map(m=>{acc+=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='entrata');acc-=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='uscita');return acc});const min=Math.min(0,...vals),max=Math.max(1,...vals);ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle='#e5d8e2';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=20+i*50;ctx.beginPath();ctx.moveTo(55,y);ctx.lineTo(730,y);ctx.stroke()}ctx.strokeStyle='#8e2a70';ctx.lineWidth=4;ctx.beginPath();vals.forEach((v,i)=>{const x=62+i*60,y=177-(v-min)/(max-min)*150;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.fillStyle='#766476';ctx.font='13px Arial';labels.forEach((m,i)=>{if(i%2===0)ctx.fillText(m.slice(5),57+i*60,210)});ctx.fillText(euros(max),2,14);ctx.fillText(euros(min),2,186)}
+
+const palette=['#74215e','#a84a88','#d680ad','#e9abcb','#6f65ae','#3c9aa0','#e7a254','#9b9ba3'];
+function expenseRows(monthRows){return monthRows.filter(r=>r.direction==='uscita'&&Number(r.amount)>0&&!(r.category==='Rimborso Angela'&&r.status==='previsto'))}
+function incomeRows(monthRows){return monthRows.filter(r=>r.direction==='entrata'&&Number(r.amount)>0&&!(r.category==='Rimborso Angela'&&r.status==='previsto'))}
+function pieDataByCategory(monthRows){
+ const buckets=new Map();
+ expenseRows(monthRows).forEach(r=>{const name=(r.category||'Altro').trim()||'Altro';buckets.set(name,(buckets.get(name)||0)+Number(r.amount))});
+ const ordered=[...buckets.entries()].sort((a,b)=>b[1]-a[1]);
+ if(ordered.length<=7)return ordered;
+ return [...ordered.slice(0,6),['Altre categorie',ordered.slice(6).reduce((acc,[,n])=>acc+n,0)]];
+}
+function drawDonut(containerId,segments,unitLabel){
+ const root=$(containerId);root.replaceChildren();
+ const data=segments.filter(([,amount])=>Number(amount)>0);
+ const total=data.reduce((acc,[,amount])=>acc+Number(amount),0);
+ const frame=document.createElement('div');frame.className='donut-layout';
+ const ring=document.createElement('div');ring.className='donut-ring';
+ ring.setAttribute('role','img');
+ ring.setAttribute('aria-label',total>0?data.map(([name,value])=>name+': '+euros(value)).join(', '):'Nessun movimento disponibile');
+ if(total>0){
+  let position=0;
+  const slices=data.map(([,raw],i)=>{const start=position;position+=100*Number(raw)/total;return palette[i%palette.length]+' '+start.toFixed(3)+'% '+position.toFixed(3)+'%'}).join(', ');
+  ring.style.background='conic-gradient('+slices+')';
+ }
+ const hole=document.createElement('div');hole.className='donut-hole';
+ const number=document.createElement('b');number.textContent=euros(total);
+ const caption=document.createElement('small');caption.textContent=total>0?unitLabel:'Nessun dato';
+ hole.append(number,caption);ring.append(hole);frame.append(ring);
+ const legend=document.createElement('div');legend.className='donut-legend';
+ if(total===0){const p=document.createElement('p');p.className='muted';p.textContent='Quando registri i movimenti, il grafico si aggiornerà automaticamente.';legend.append(p)}
+ data.forEach(([name,value],i)=>{
+  const row=document.createElement('div');row.className='donut-legend-row';
+  const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=palette[i%palette.length];
+  const label=document.createElement('span');label.className='legend-name';label.textContent=name+' · '+Math.round(Number(value)/total*100)+'%';
+  const amount=document.createElement('span');amount.className='legend-sum';amount.textContent=euros(value);
+  row.append(dot,label,amount);legend.append(row);
+ });
+ frame.append(legend);root.append(frame);
+}
+function insight(title,value,description){
+ const card=document.createElement('div');card.className='insight-tile';
+ const h=document.createElement('span');h.className='insight-title';h.textContent=title;
+ const v=document.createElement('span');v.className='insight-value';v.textContent=value;
+ card.append(h,v);
+ if(description){const n=document.createElement('div');n.className='insight-note';n.textContent=description;card.append(n)}
+ return card;
+}
+function renderVisuals(monthRows){
+ const costs=expenseRows(monthRows),income=incomeRows(monthRows);
+ const paid=sum(costs,r=>r.status==='pagato');
+ const unpaid=sum(costs,r=>r.status==='previsto');
+ const incomings=sum(income,()=>true);
+ const spent=paid+unpaid;
+ const creditPaid=sum(rows,r=>r.category==='Rimborso Angela'&&r.status==='pagato'&&r.direction===(ledger==='azienda'?'uscita':'entrata'));
+ const creditPending=Math.max(0,1512-creditPaid);
+ $('chartsMonth').textContent=new Date($('month').value+'-02T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+ drawDonut('pieCategories',pieDataByCategory(monthRows),'spese totali');
+ drawDonut('pieStatus',[['Già pagato',paid],['Ancora da pagare',unpaid]],'spese');
+ drawDonut('pieFlow',[['Entrate registrate',incomings],['Uscite registrate',spent]],'movimenti');
+ if(ledger==='azienda'){
+  $('pieExtraTitle').textContent='Credito Angela';
+  $('pieExtraDesc').textContent='Anticipi personali restituiti e ancora da rimborsare';
+  drawDonut('pieExtra',[['Già rimborsato',Math.min(1512,creditPaid)],['Da restituire',creditPending]],'credito totale');
+ }else{
+  $('pieExtraTitle').textContent='Rate e altre uscite';
+  $('pieExtraDesc').textContent='Quanto incidono le rate sulle spese personali';
+  const rate=sum(costs,r=>r.category==='Rate');
+  drawDonut('pieExtra',[['Rate',rate],['Altre spese',Math.max(0,spent-rate)]],'spese totali');
+ }
+ const due=rows.filter(r=>r.direction==='uscita'&&r.status==='previsto'&&r.category!=='Rimborso Angela').sort((a,b)=>a.entry_date.localeCompare(b.entry_date));
+ const now=new Date().toLocaleDateString('en-CA');
+ const next=due.find(r=>r.entry_date>=now)||due[0];
+ const largest=[...costs].sort((a,b)=>Number(b.amount)-Number(a.amount))[0];
+ const category=pieDataByCategory(monthRows)[0];
+ const received=sum(income,r=>r.status==='pagato');
+ const expected=sum(income,r=>r.status==='previsto');
+ const projected=received+expected-paid-unpaid;
+ const notes=$('insights');notes.replaceChildren();
+ notes.append(
+  insight('Prossima scadenza',next?next.title+' · '+euros(next.amount):'Nessuna scadenza',next?new Date(next.entry_date+'T12:00:00').toLocaleDateString('it-IT')+(next.entry_date<now?' · Scaduta':''):'Non risultano uscite in sospeso'),
+  insight('Spesa più alta del mese',largest?largest.title:'Nessuna',largest?euros(largest.amount):''),
+  insight('Categoria più costosa',category?category[0]:'Nessuna',category?euros(category[1]):''),
+  insight('Proiezione del mese',euros(projected), 'Entrate incassate e previste, meno uscite pagate e previste. Non include crediti senza data certa e non è il saldo bancario')
+ );
+ if(ledger==='azienda')notes.append(insight('Angela: ancora da rimborsare',euros(creditPending),'Credito registrato separatamente dai costi ordinari'));
+ else notes.append(insight('Credito verso Aerial Move',euros(creditPending),'Da incassare solo quando Aerial Move effettua il rimborso'));
+ $('appUpdated').textContent='Dati aggiornati: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+' · ogni nuovo movimento aggiorna automaticamente i grafici.';
+}
 function edit(r){$('editId').value=r.id;$('date').value=r.entry_date;$('amount').value=r.amount;$('title').value=r.title;$('category').value=r.category;$('notes').value=r.notes||'';$('direction').value=r.direction;$('status').value=r.status;$('formTitle').textContent='Modifica movimento';$('form').scrollIntoView({behavior:'smooth'})}
 function reset(){$('form').reset();$('editId').value='';$('date').value=today;$('formTitle').textContent='Nuovo movimento'}$('cancel').onclick=reset;
 $('form').onsubmit=async ev=>{ev.preventDefault();const rec={id:$('editId').value||null,entry_date:$('date').value,title:$('title').value.trim(),category:$('category').value,notes:$('notes').value,amount:Number($('amount').value),direction:$('direction').value,status:$('status').value};if(!rec.title||!(rec.amount>0)){say('Inserisci descrizione e importo valido');return}try{$('save').disabled=true;const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:rec});if(error)throw error;reset();await load();say('Movimento salvato')}catch(e){say(e.message)}finally{$('save').disabled=false}};
