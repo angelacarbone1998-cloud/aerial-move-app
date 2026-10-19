@@ -1,11 +1,79 @@
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#74215e"><link rel="manifest" href="./manifest.webmanifest"><title>Aerial Move Finanze · Semplice</title><style>
 *{box-sizing:border-box}body{margin:0;background:#fbf8fb;color:#30253a;font:15px system-ui,-apple-system,sans-serif}header{background:#74215e;color:white;padding:22px 18px}h1{font-size:22px;margin:0}header small{opacity:.8}.wrap{max-width:740px;margin:auto;padding:14px 15px 80px}.card{background:white;border:1px solid #eadfe9;border-radius:18px;margin:12px 0;padding:17px;box-shadow:0 2px 8px #35182f08}h2{font-size:19px;margin:0 0 7px}p{line-height:1.5}.muted{font-size:13px;color:#7b6b7b}label{display:block;font-weight:650;font-size:13px;margin:11px 0 6px}input,select{background:white;color:#312132;width:100%;padding:12px;border:1px solid #d9c7d6;border-radius:10px;font:inherit}button{font:inherit;font-size:14px;font-weight:680;border:0;background:#74215e;color:white;padding:12px 14px;border-radius:11px;cursor:pointer}button:disabled{opacity:.5}button.soft{background:#f0e6ef;color:#6d2459}button.ghost{background:white;color:#74215e;border:1px solid #dfccdc}.row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hide{display:none!important}.seg{display:flex;gap:8px}.seg button{flex:1}.seg button:not(.active){background:#efe5ed;color:#724866}.stat{padding:13px;background:#f8f0f6;border-radius:12px}.stat label{margin:0;font-size:12px;color:#715f70}.stat strong{font-size:22px;display:block;margin-top:5px;overflow-wrap:anywhere}.item{padding:15px 0;border-top:1px solid #f0e8ed}.item:first-child{border-top:0}.name{font-size:16px;font-weight:720}.money{font-size:19px;font-weight:750;white-space:nowrap}.state{font-size:12px;font-weight:700;border-radius:20px;background:#ffefd6;color:#855a19;padding:5px 8px;display:inline-block;margin:7px 0}.state.ok{color:#17623c;background:#e7f6ed}.warning{border-radius:12px;background:#fff3e1;color:#815b16;font-size:13px;padding:12px;margin:9px 0}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{padding:10px 12px;font-size:13px}.edit{background:#faf5f9;padding:14px;border-radius:14px;margin:12px 0}.editgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.edit input{font-size:16px}.intro{background:#f7edf5;border-radius:14px;padding:12px;color:#643c5a;font-size:13px}.navlink{color:#71305f;font-weight:700;text-decoration:none}.full{width:100%}#message{position:fixed;bottom:14px;left:14px;right:14px;max-width:710px;margin:auto;background:#2f2431;color:white;padding:14px;border-radius:13px;display:none;z-index:10}summary{cursor:pointer;color:#70305d;font-weight:650}.tag{font-size:12px;color:#765c71} @media(max-width:365px){.grid,.editgrid{grid-template-columns:1fr}}
+
+/* Area personale: rate e credito nella stessa schermata */
+.personalincome{background:#f1f8f3;border-color:#d5eadb}
+.personalHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.personalCardTitle{font-size:18px;margin:0 0 5px}
+.personalLine{padding:14px 0;border-bottom:1px solid #eee5eb}
+.personalLine:last-child{border-bottom:0}
+.personalLine .row{align-items:flex-start}
+.personalDate{display:block;font-size:12px;color:#7b6c7b;margin-top:4px}
+.personalNote{color:#795c70;font-size:12px;line-height:1.4;margin:8px 0}
+.personalArrears{background:#fff8ed;border-radius:12px;padding:12px}
+.personalArrears h3{font-size:15px;margin:0}
+.personalArrears .personalLine{border-bottom-color:#f0dfc7}
+.personalCredit{background:#fcf7fb}
+.personalCredit strong{font-size:26px}
+.creditDetails summary{padding:10px 0}
+.creditDetails .row{padding:8px 0;border-bottom:1px solid #f1e6ef}
+.creditDetails .row:last-child{border-bottom:0}
+.creditMini{font-size:12px;color:#786b76;line-height:1.5}
+.auxMetric{display:none}
+.auxMetric.active{display:block}
+.personalcaution{background:#fff4e0;padding:11px;border-radius:11px;font-size:12px;color:#805b20;margin:10px 0}
 </style></head><body><header><h1>✦ Aerial Move Finanze</h1><small>Pagamenti chiari, senza schermate complicate</small></header><main class="wrap">
 <section id="login" class="card"><h2>Accedi alle tue finanze</h2><p class="muted">Le due sezioni hanno password indipendenti.</p><label>Sezione</label><select id="loginSection"><option value="azienda">Aerial Move</option><option value="personale">Personale Angela</option></select><label>Password</label><input type="password" id="password" autocomplete="current-password"><button id="enter" class="full" style="margin-top:13px">Entra</button><p class="muted">Per recuperare una password usa <a class="navlink" href="./avanzato.html">Password dimenticata</a>.</p></section>
 <section id="main" class="hide">
 <div class="card"><div class="seg"><button id="company" class="active">Aerial Move</button><button id="personal">Personale Angela</button></div><label for="month">Mese da gestire</label><input id="month" type="month"></div>
-<div class="card"><h2>Il mese in breve</h2><div class="grid"><div class="stat"><label>Ancora da pagare</label><strong id="due">—</strong></div><div class="stat"><label>Già pagato</label><strong id="paid">—</strong></div></div><p class="muted">Totali delle quote fisse di questo mese. Le entrate fisse sono elencate sotto separatamente.</p></div>
-<div class="card"><div class="row"><h2>Le quote mensili</h2><button id="new" class="soft">+ Nuova quota</button></div><p class="muted">Per cambiare una cifra premi <b>Modifica €</b> sulla sua riga. Puoi scegliere se modificare soltanto questo mese oppure anche i prossimi.</p><div id="items"></div><div class="row"><button id="prepare" class="soft">Crea quote mancanti</button><button id="reload" class="ghost">↻ Aggiorna</button></div></div>
+<div class="card"><h2>Il mese in breve</h2><div class="grid">
+<div class="stat"><label id="dueLabel">Ancora da pagare</label><strong id="due">—</strong></div>
+<div class="stat"><label id="paidLabel">Già pagato</label><strong id="paid">—</strong></div>
+<div class="stat auxMetric" id="personalArrearsStat"><label>Arretrati da saldare</label><strong id="personalArrearsTotal">—</strong></div>
+<div class="stat auxMetric" id="personalIncomeStat"><label>Entrate incassate del mese</label><strong id="personalIncomePaid">—</strong></div>
+</div><p class="muted" id="summaryNote">Totali delle quote fisse di questo mese. Le entrate fisse sono elencate sotto separatamente.</p></div>
+<div class="card"><div class="row"><h2 id="fixedTitle">Le quote mensili</h2><button id="new" class="soft">+ Nuova quota</button></div><p class="muted">Per cambiare una cifra premi <b>Modifica €</b> sulla sua riga. Puoi scegliere se modificare soltanto questo mese oppure anche i prossimi.</p><div id="items"></div><div class="row"><button id="prepare" class="soft">Crea quote mancanti</button><button id="reload" class="ghost">↻ Aggiorna</button></div></div>
+
+<section id="personalArea" class="hide">
+<div class="card personalCredit">
+ <div class="personalHeader"><div><h2 class="personalCardTitle">Aerial Move deve ad Angela</h2><p class="muted" style="margin:0">Anticipi personali da restituire</p></div><strong id="personalCreditDue">1.512,00 €</strong></div>
+ <div class="grid" style="margin-top:15px">
+  <div class="stat"><label>Credito iniziale</label><strong>1.512 €</strong></div>
+  <div class="stat personalincome"><label>Rimborsi ricevuti</label><strong id="personalRepaid">0 €</strong></div>
+ </div>
+ <details class="creditDetails"><summary>Vedi le 5 spese anticipate</summary>
+  <div class="row"><span>Istruttrici</span><b>600 €</b></div>
+  <div class="row"><span>Statuto</span><b>200 €</b></div>
+  <div class="row"><span>Workshop</span><b>388 €</b></div>
+  <div class="row"><span>Fatture</span><b>174 €</b></div>
+  <div class="row"><span>Bungee</span><b>150 €</b></div>
+ </details>
+ <p class="creditMini">Questo credito non viene conteggiato nei soldi spendibili finché non viene realmente incassato.</p>
+ <button type="button" id="addReimbursement" class="soft">+ Registra rimborso ricevuto</button>
+ <form id="reimbursementForm" class="edit hide">
+  <label for="reimbursementAmount">Importo ricevuto (€)</label><input type="number" id="reimbursementAmount" min=".01" step=".01" required>
+  <label for="reimbursementDate">Data del rimborso</label><input type="date" id="reimbursementDate" required>
+  <div class="actions"><button type="submit" id="reimbursementSave">Salva rimborso</button><button type="button" class="soft" id="reimbursementCancel">Annulla</button></div>
+ </form>
+</div>
+<div class="card">
+ <div class="row"><div><h2>Rate e spese personali</h2><p class="muted" style="margin:0">Modifica importo o scadenza e segna ciò che hai pagato.</p></div><button type="button" id="newPersonal" class="soft">+ Aggiungi spesa</button></div>
+ <div id="personalMonthItems"></div>
+ <div id="personalArrearsBox" class="personalArrears hide"><h3>Rate arretrate ancora da pagare</h3><div id="personalArrearsItems"></div></div>
+</div>
+<div id="newPersonalPanel" class="card hide">
+<h2>Aggiungi movimento personale</h2>
+<form id="newPersonalForm">
+ <label for="newPersonalName">Descrizione</label><input id="newPersonalName" placeholder="Es. Carburante, rata" required maxlength="130">
+ <div class="editgrid">
+  <div><label for="newPersonalAmount">Importo (€)</label><input type="number" id="newPersonalAmount" min=".01" step=".01" required></div>
+  <div><label for="newPersonalDate">Data</label><input type="date" id="newPersonalDate" required></div>
+  <div><label for="newPersonalCategory">Categoria</label><select id="newPersonalCategory"><option>Rate</option><option>Alimentari</option><option>Carburante</option><option>Utenze</option><option>Altro</option></select></div>
+  <div><label for="newPersonalDirection">Tipo</label><select id="newPersonalDirection"><option value="uscita">Spesa</option><option value="entrata">Entrata</option></select></div>
+ </div>
+ <div class="actions" style="margin-top:13px"><button type="submit" id="newPersonalSave">Salva movimento</button><button type="button" class="soft" id="newPersonalCancel">Annulla</button></div>
+</form></div>
+</section>
 <div id="newPanel" class="card hide"><h2>Nuova quota mensile</h2><form id="newForm"><label>Nome</label><input id="newName" required placeholder="Es. Commercialista"><div class="editgrid"><div><label>Importo €</label><input id="newAmount" type="number" min=".01" step=".01" required></div><div><label>Giorno</label><input id="newDay" type="number" min="1" max="28" value="5" required></div><div><label>Categoria</label><select id="newCategory"><option>Collaboratori</option><option>Affitto</option><option>Rate</option><option>Utenze</option><option>Fornitori</option><option>Stipendio</option><option>Altro</option></select></div><div><label>Tipo</label><select id="newDirection"><option value="uscita">Spesa</option><option value="entrata">Entrata</option></select></div><div><label>Da mese</label><input id="newStart" type="month" required></div><div><label>Fino al (opzionale)</label><input id="newEnd" type="month"></div></div><div class="row" style="margin-top:14px"><button type="submit" id="newSave">Salva nuova quota</button><button id="newCancel" type="button" class="soft">Annulla</button></div></form></div>
 <div class="card"><h2>Altre informazioni</h2><p class="muted">Grafici, budget, credito Angela, singoli movimenti e password restano disponibili nella versione completa.</p><a id="advanced" class="navlink" href="./avanzato.html">Apri grafici e gestione completa →</a></div>
 <div class="row"><button id="logout" class="soft">Esci</button></div></section></main><div id="message" role="status"></div>
@@ -50,7 +118,21 @@ function render(){if(!token)return;$('company').className=ledger==='azienda'?'ac
   card.append(actions);list.append(card);
  }
  if(!items.length)list.append(el('p','muted','Non ci sono quote fisse attive per questo mese. Premi “+ Nuova quota” oppure cambia il mese.'));
- $('paid').textContent=money(paid);$('due').textContent=money(due);
+ if(ledger==='personale'){
+  const x=personalTotals();paid+=x.paidExpenses;due+=x.dueExpenses;
+  $('personalArrearsTotal').textContent=money(x.overdue);
+  $('personalIncomePaid').textContent=money(x.received);
+  renderPersonalArea();
+}
+$('paid').textContent=money(paid);$('due').textContent=money(due);
+$('personalArea').classList.toggle('hide',ledger!=='personale');
+$('personalArrearsStat').classList.toggle('active',ledger==='personale');
+$('personalIncomeStat').classList.toggle('active',ledger==='personale');
+$('fixedTitle').textContent=ledger==='personale'?'Entrate e spese fisse':'Le quote mensili';
+$('summaryNote').textContent=ledger==='personale'?
+ 'Sono conteggiati i movimenti del mese, senza sommare il credito non ancora incassato. Gli arretrati sono mostrati separatamente.':
+ 'Totali delle quote fisse del mese; le entrate sono elencate separatamente.';
+
 }
 async function togglePaid(t,r){
  const next=r?.status==='pagato'?'previsto':'pagato';
@@ -90,6 +172,145 @@ async function saveAmount(t,r,raw,mode,button){
   await load();
  }catch(e){msg('Non salvato: '+e.message)}finally{button.disabled=false}
 }
+
+function personalIndependentRows(){
+ return rows.filter(r=>r.category!=='Rimborso Angela'
+  && !templates.some(t=>r.direction===t.direction
+   && (r.recurring_id===t.id||(!r.recurring_id&&r.title.trim().toLowerCase()===t.title.trim().toLowerCase()))));
+}
+function personalTotals(){
+ const month=$('month').value,oneOff=personalIndependentRows();
+ const current=oneOff.filter(r=>r.entry_date.slice(0,7)===month);
+ const arrears=oneOff.filter(r=>r.entry_date.slice(0,7)<month&&r.status==='previsto'&&r.direction==='uscita');
+ const incomeFixed=templates.filter(t=>t.direction==='entrata'&&applicable(t))
+  .map(t=>findMonth(t)).filter(r=>r?.status==='pagato');
+ return {
+  paidExpenses:current.filter(r=>r.direction==='uscita'&&r.status==='pagato').reduce((s,r)=>s+Number(r.amount),0),
+  dueExpenses:current.filter(r=>r.direction==='uscita'&&r.status==='previsto').reduce((s,r)=>s+Number(r.amount),0),
+  overdue:arrears.reduce((s,r)=>s+Number(r.amount),0),
+  received:incomeFixed.reduce((s,r)=>s+Number(r.amount),0)
+   +current.filter(r=>r.direction==='entrata'&&r.status==='pagato').reduce((s,r)=>s+Number(r.amount),0)
+   +rows.filter(r=>r.category==='Rimborso Angela'&&r.direction==='entrata'&&r.status==='pagato'&&r.entry_date.slice(0,7)===month).reduce((s,r)=>s+Number(r.amount),0)
+ };
+}
+function personalRemainingCredit(){
+ const received=rows.filter(r=>r.category==='Rimborso Angela'&&r.status==='pagato'&&r.direction==='entrata')
+  .reduce((s,r)=>s+Number(r.amount),0);
+ return {received,remaining:Math.max(0,1512-received)};
+}
+function renderPersonalArea(){
+ const credit=personalRemainingCredit();
+ $('personalCreditDue').textContent=money(credit.remaining);
+ $('personalRepaid').textContent=money(credit.received);
+ const month=$('month').value;
+ const all=personalIndependentRows().filter(r=>r.direction==='uscita'||r.direction==='entrata');
+ const monthItems=all.filter(r=>r.entry_date.slice(0,7)===month).sort((a,b)=>a.entry_date.localeCompare(b.entry_date));
+ const arrears=all.filter(r=>r.entry_date.slice(0,7)<month&&r.direction==='uscita'&&r.status==='previsto')
+  .sort((a,b)=>a.entry_date.localeCompare(b.entry_date));
+ const list=$('personalMonthItems');list.replaceChildren();
+ if(!monthItems.length)list.append(el('p','muted','Nessun altro movimento in questo mese. Aggiungi una spesa se necessario.'));
+ for(const r of monthItems)list.append(personalRecordCard(r));
+ const box=$('personalArrearsBox');
+ box.classList.toggle('hide',arrears.length===0);
+ const overdue=$('personalArrearsItems');overdue.replaceChildren();
+ for(const r of arrears)overdue.append(personalRecordCard(r));
+}
+function personalRecordCard(r){
+ const card=el('div','personalLine');
+ const header=el('div','row');header.append(el('span','name',r.title),el('span','money',money(r.amount)));card.append(header);
+ const day=new Date(r.entry_date+'T12:00:00').toLocaleDateString('it-IT');
+ card.append(el('span','personalDate',day+' · '+r.category));
+ const paid=r.status==='pagato';
+ card.append(el('span','state'+(paid?' ok':''),paid?(r.direction==='entrata'?'Incassato':'Pagato'):(r.direction==='entrata'?'Da incassare':'Da pagare')));
+ if(r.notes)card.append(el('p','personalNote',r.notes));
+ const actions=el('div','actions');
+ const change=el('button','soft','✏️ Modifica € / data');
+ change.onclick=()=>editPersonalRecord(r,card);actions.append(change);
+ const state=el('button','','✓ '+(paid?'Annulla effettuato':(r.direction==='entrata'?'Segna incassato':'Segna pagato')));
+ state.onclick=()=>togglePersonalRecord(r);actions.append(state);
+ card.append(actions);
+ return card;
+}
+async function writePersonalRecord(r,override={}){
+ const updated={
+  id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,
+  amount:Number(r.amount),direction:r.direction,status:r.status,
+  notes:r.notes||'',...override
+ };
+ const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:updated});
+ if(error)throw error;
+ await load();
+}
+async function togglePersonalRecord(r){
+ const status=r.status==='pagato'?'previsto':'pagato';
+ if(!confirm('Confermi che '+r.title+' da '+money(r.amount)+' è '+(status==='pagato'?'stato effettuato':'da riportare come non effettuato')+'?'))return;
+ try{await writePersonalRecord(r,{status});msg('Stato aggiornato.')}catch(e){msg('Non salvato: '+e.message)}
+}
+function editPersonalRecord(r,card){
+ document.querySelectorAll('.personalInlineEdit').forEach(n=>n.remove());
+ const panel=el('div','edit personalInlineEdit');
+ const label1=el('label','','Importo (€)');const input=el('input');input.type='number';input.min='.01';input.step='.01';input.value=r.amount;
+ const label2=el('label','','Data scadenza');const date=el('input');date.type='date';date.value=r.entry_date;
+ const actions=el('div','actions');
+ const save=el('button','','Salva');const cancel=el('button','soft','Annulla');cancel.onclick=()=>panel.remove();
+ save.onclick=async()=>{
+  const amount=Number(input.value);
+  if(!Number.isFinite(amount)||amount<=0||!date.value){msg('Verifica data e importo.');return}
+  save.disabled=true;
+  try{await writePersonalRecord(r,{amount,entry_date:date.value});msg('Movimento aggiornato.')}catch(e){msg('Modifica non salvata: '+e.message)}
+  finally{save.disabled=false}
+ };
+ actions.append(save,cancel);panel.append(label1,input,label2,date,actions);card.append(panel);
+ input.focus();
+}
+$('newPersonal').onclick=()=>{
+ $('newPersonalPanel').classList.remove('hide');
+ $('newPersonalDate').value=$('month').value+'-15';
+ $('newPersonalPanel').scrollIntoView({behavior:'smooth'});
+};
+$('newPersonalCancel').onclick=()=>$('newPersonalPanel').classList.add('hide');
+$('newPersonalForm').onsubmit=async e=>{
+ e.preventDefault();
+ const obj={entry_date:$('newPersonalDate').value,title:$('newPersonalName').value.trim(),
+  amount:Number($('newPersonalAmount').value),direction:$('newPersonalDirection').value,
+  category:$('newPersonalCategory').value,status:'previsto',notes:''};
+ if(!obj.title||!obj.entry_date||obj.amount<=0||!Number.isFinite(obj.amount)){msg('Controlla il movimento.');return}
+ $('newPersonalSave').disabled=true;
+ try{
+  const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:obj});
+  if(error)throw error;
+  $('newPersonalPanel').classList.add('hide');$('newPersonalForm').reset();
+  await load();msg('Movimento personale aggiunto.');
+ }catch(err){msg('Non salvato: '+err.message)}
+ finally{$('newPersonalSave').disabled=false}
+};
+$('addReimbursement').onclick=()=>{
+ const c=personalRemainingCredit();
+ if(c.remaining<=0){msg('Il credito risulta già rimborsato.');return}
+ $('reimbursementForm').classList.remove('hide');
+ $('reimbursementDate').value=new Date().toLocaleDateString('en-CA');
+ $('reimbursementAmount').value='';
+ $('reimbursementAmount').max=c.remaining;
+};
+$('reimbursementCancel').onclick=()=>$('reimbursementForm').classList.add('hide');
+$('reimbursementForm').onsubmit=async e=>{
+ e.preventDefault();
+ const amount=Number($('reimbursementAmount').value),credit=personalRemainingCredit();
+ if(!Number.isFinite(amount)||amount<=0||amount>credit.remaining){
+  msg('Inserisci un importo positivo non superiore al credito residuo di '+money(credit.remaining));return;
+ }
+ if(!confirm('Confermi di aver ricevuto '+money(amount)+' da Aerial Move?'))return;
+ $('reimbursementSave').disabled=true;
+ const obj={entry_date:$('reimbursementDate').value,title:'Rimborso ricevuto da Aerial Move',
+  category:'Rimborso Angela',amount,direction:'entrata',status:'pagato',
+  notes:'Rimborso parziale degli anticipi personali per Aerial Move'};
+ try{
+  const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:obj});
+  if(error)throw error;
+  $('reimbursementForm').classList.add('hide');await load();msg('Rimborso registrato. Il credito residuo è aggiornato.');
+ }catch(err){msg('Rimborso non salvato: '+err.message)}
+ finally{$('reimbursementSave').disabled=false}
+};
 $('new').onclick=()=>{$('newPanel').classList.remove('hide');$('newStart').value=$('month').value;$('newPanel').scrollIntoView({behavior:'smooth'})};
 $('newCancel').onclick=()=>$('newPanel').classList.add('hide');
 $('newForm').onsubmit=async e=>{
@@ -98,5 +319,11 @@ $('newForm').onsubmit=async e=>{
  $('newSave').disabled=true;
  try{const {error}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:r,p_apply_future:false,p_from_month:null});if(error)throw error;$('newPanel').classList.add('hide');$('newForm').reset();await ensureMonth();msg('Nuova quota mensile salvata.')}catch(err){msg('Non salvato: '+err.message)}finally{$('newSave').disabled=false}
 };
-(async()=>{const chosen=localStorage.getItem('am_finanze_preferred')||'azienda',saved=localStorage.getItem(key(chosen))||sessionStorage.getItem(key(chosen));$('loginSection').value=chosen;if(saved)await openSection(chosen,saved)})();
+(async()=>{
+ const param=new URLSearchParams(location.search).get('sezione');
+ const chosen=['azienda','personale'].includes(param)?param:(localStorage.getItem('am_finanze_preferred')||'azienda');
+ const saved=localStorage.getItem(key(chosen))||sessionStorage.getItem(key(chosen));
+ $('loginSection').value=chosen;
+ if(saved)await openSection(chosen,saved);
+})();
 </script></body></html>
