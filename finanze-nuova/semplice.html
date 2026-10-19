@@ -1,0 +1,102 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#74215e"><link rel="manifest" href="./manifest.webmanifest"><title>Aerial Move Finanze · Semplice</title><style>
+*{box-sizing:border-box}body{margin:0;background:#fbf8fb;color:#30253a;font:15px system-ui,-apple-system,sans-serif}header{background:#74215e;color:white;padding:22px 18px}h1{font-size:22px;margin:0}header small{opacity:.8}.wrap{max-width:740px;margin:auto;padding:14px 15px 80px}.card{background:white;border:1px solid #eadfe9;border-radius:18px;margin:12px 0;padding:17px;box-shadow:0 2px 8px #35182f08}h2{font-size:19px;margin:0 0 7px}p{line-height:1.5}.muted{font-size:13px;color:#7b6b7b}label{display:block;font-weight:650;font-size:13px;margin:11px 0 6px}input,select{background:white;color:#312132;width:100%;padding:12px;border:1px solid #d9c7d6;border-radius:10px;font:inherit}button{font:inherit;font-size:14px;font-weight:680;border:0;background:#74215e;color:white;padding:12px 14px;border-radius:11px;cursor:pointer}button:disabled{opacity:.5}button.soft{background:#f0e6ef;color:#6d2459}button.ghost{background:white;color:#74215e;border:1px solid #dfccdc}.row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hide{display:none!important}.seg{display:flex;gap:8px}.seg button{flex:1}.seg button:not(.active){background:#efe5ed;color:#724866}.stat{padding:13px;background:#f8f0f6;border-radius:12px}.stat label{margin:0;font-size:12px;color:#715f70}.stat strong{font-size:22px;display:block;margin-top:5px;overflow-wrap:anywhere}.item{padding:15px 0;border-top:1px solid #f0e8ed}.item:first-child{border-top:0}.name{font-size:16px;font-weight:720}.money{font-size:19px;font-weight:750;white-space:nowrap}.state{font-size:12px;font-weight:700;border-radius:20px;background:#ffefd6;color:#855a19;padding:5px 8px;display:inline-block;margin:7px 0}.state.ok{color:#17623c;background:#e7f6ed}.warning{border-radius:12px;background:#fff3e1;color:#815b16;font-size:13px;padding:12px;margin:9px 0}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{padding:10px 12px;font-size:13px}.edit{background:#faf5f9;padding:14px;border-radius:14px;margin:12px 0}.editgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.edit input{font-size:16px}.intro{background:#f7edf5;border-radius:14px;padding:12px;color:#643c5a;font-size:13px}.navlink{color:#71305f;font-weight:700;text-decoration:none}.full{width:100%}#message{position:fixed;bottom:14px;left:14px;right:14px;max-width:710px;margin:auto;background:#2f2431;color:white;padding:14px;border-radius:13px;display:none;z-index:10}summary{cursor:pointer;color:#70305d;font-weight:650}.tag{font-size:12px;color:#765c71} @media(max-width:365px){.grid,.editgrid{grid-template-columns:1fr}}
+</style></head><body><header><h1>✦ Aerial Move Finanze</h1><small>Pagamenti chiari, senza schermate complicate</small></header><main class="wrap">
+<section id="login" class="card"><h2>Accedi alle tue finanze</h2><p class="muted">Le due sezioni hanno password indipendenti.</p><label>Sezione</label><select id="loginSection"><option value="azienda">Aerial Move</option><option value="personale">Personale Angela</option></select><label>Password</label><input type="password" id="password" autocomplete="current-password"><button id="enter" class="full" style="margin-top:13px">Entra</button><p class="muted">Per recuperare una password usa <a class="navlink" href="./avanzato.html">Password dimenticata</a>.</p></section>
+<section id="main" class="hide">
+<div class="card"><div class="seg"><button id="company" class="active">Aerial Move</button><button id="personal">Personale Angela</button></div><label for="month">Mese da gestire</label><input id="month" type="month"></div>
+<div class="card"><h2>Il mese in breve</h2><div class="grid"><div class="stat"><label>Ancora da pagare</label><strong id="due">—</strong></div><div class="stat"><label>Già pagato</label><strong id="paid">—</strong></div></div><p class="muted">Totali delle quote fisse di questo mese. Le entrate fisse sono elencate sotto separatamente.</p></div>
+<div class="card"><div class="row"><h2>Le quote mensili</h2><button id="new" class="soft">+ Nuova quota</button></div><p class="muted">Per cambiare una cifra premi <b>Modifica €</b> sulla sua riga. Puoi scegliere se modificare soltanto questo mese oppure anche i prossimi.</p><div id="items"></div><div class="row"><button id="prepare" class="soft">Crea quote mancanti</button><button id="reload" class="ghost">↻ Aggiorna</button></div></div>
+<div id="newPanel" class="card hide"><h2>Nuova quota mensile</h2><form id="newForm"><label>Nome</label><input id="newName" required placeholder="Es. Commercialista"><div class="editgrid"><div><label>Importo €</label><input id="newAmount" type="number" min=".01" step=".01" required></div><div><label>Giorno</label><input id="newDay" type="number" min="1" max="28" value="5" required></div><div><label>Categoria</label><select id="newCategory"><option>Collaboratori</option><option>Affitto</option><option>Rate</option><option>Utenze</option><option>Fornitori</option><option>Stipendio</option><option>Altro</option></select></div><div><label>Tipo</label><select id="newDirection"><option value="uscita">Spesa</option><option value="entrata">Entrata</option></select></div><div><label>Da mese</label><input id="newStart" type="month" required></div><div><label>Fino al (opzionale)</label><input id="newEnd" type="month"></div></div><div class="row" style="margin-top:14px"><button type="submit" id="newSave">Salva nuova quota</button><button id="newCancel" type="button" class="soft">Annulla</button></div></form></div>
+<div class="card"><h2>Altre informazioni</h2><p class="muted">Grafici, budget, credito Angela, singoli movimenti e password restano disponibili nella versione completa.</p><a id="advanced" class="navlink" href="./avanzato.html">Apri grafici e gestione completa →</a></div>
+<div class="row"><button id="logout" class="soft">Esci</button></div></section></main><div id="message" role="status"></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+const db=createClient('https://ztskaqyudcamdailxdef.supabase.co','sb_publishable_EohjiHILTe57ttNQHtXw8A_Tdz_-Rvr');
+const $=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const d=new Date(),current=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+$('month').value=current;$('newStart').value=current;
+let ledger='azienda',token='',templates=[],rows=[],busy=false;
+const key=s=>'am_finanze_v2_'+s;
+function msg(t){$('message').textContent=t;$('message').style.display='block';setTimeout(()=>$('message').style.display='none',5500)}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function findMonth(t){return rows.filter(r=>r.entry_date.slice(0,7)===$('month').value&&r.direction===t.direction&&(r.recurring_id===t.id||(!r.recurring_id&&r.title.trim().toLowerCase()===t.title.trim().toLowerCase()))).sort((a,b)=>Number(b.status==='pagato')-Number(a.status==='pagato'))[0]||null}
+function applicable(t){const m=$('month').value;return t.active&&t.start_month.slice(0,7)<=m&&(!t.end_month||t.end_month.slice(0,7)>=m)}
+async function openSection(s,t){ledger=s;token=t;localStorage.setItem('am_finanze_preferred',s);$('login').classList.add('hide');$('main').classList.remove('hide');$('company').className=s==='azienda'?'active':'';$('personal').className=s==='personale'?'active':'';await load()}
+async function signIn(){const s=$('loginSection').value,p=$('password').value;if(p.length<8){msg('Inserisci la password.');return}$('enter').disabled=true;try{const {data,error}=await db.rpc('finanze_login_direct',{p_ledger:s,p_password:p});if(error)throw error;if(!data){msg('Password non riconosciuta o accesso temporaneamente bloccato.');return}localStorage.setItem(key(s),data);$('password').value='';await openSection(s,data)}catch(e){msg('Accesso non riuscito: '+e.message)}finally{$('enter').disabled=false}}
+$('enter').onclick=signIn;$('password').onkeydown=e=>{if(e.key==='Enter')signIn()};
+async function switchTo(s){let t=localStorage.getItem(key(s))||sessionStorage.getItem(key(s));if(t)await openSection(s,t);else{ledger=s;token='';$('loginSection').value=s;$('main').classList.add('hide');$('login').classList.remove('hide');$('password').focus()}}
+$('company').onclick=()=>switchTo('azienda');$('personal').onclick=()=>switchTo('personale');$('logout').onclick=async()=>{try{await db.rpc('finanze_direct_logout',{p_token:token})}catch{}localStorage.removeItem(key(ledger));sessionStorage.removeItem(key(ledger));await switchTo(ledger)};
+async function load(){if(!token)return;busy=true;try{const [a,b]=await Promise.all([db.rpc('finanze_recurring_list',{p_token:token}),db.rpc('finanze_direct_read',{p_token:token})]);if(a.error)throw a.error;if(b.error)throw b.error;templates=a.data||[];rows=b.data||[];render()}catch(e){msg('Accesso non valido o errore: '+e.message);if(/scaduta|invalid|session/i.test(e.message)){localStorage.removeItem(key(ledger));sessionStorage.removeItem(key(ledger));await switchTo(ledger)}}finally{busy=false}}
+$('reload').onclick=load;$('month').onchange=render;
+async function ensureMonth(){const {error}=await db.rpc('finanze_recurring_prepare_month',{p_token:token,p_month:$('month').value});if(error)throw error;await load()}
+$('prepare').onclick=async()=>{try{await ensureMonth();msg('Scadenze mancanti create senza duplicare quelle presenti.')}catch(e){msg('Impossibile creare: '+e.message)}};
+function structureTwin(t,r){return r&&r.status==='previsto'&&t.title.toLowerCase().includes('struttura')&&rows.some(x=>x.id!==r.id&&x.status==='pagato'&&x.entry_date.slice(0,7)===$('month').value&&x.title.toLowerCase().includes('struttura')&&Number(x.amount)===Number(r.amount))}
+function render(){if(!token)return;$('company').className=ledger==='azienda'?'active':'';$('personal').className=ledger==='personale'?'active':'';
+ const list=$('items');list.replaceChildren();let paid=0,due=0;
+ const items=[...templates].filter(applicable).sort((a,b)=>a.direction.localeCompare(b.direction)||a.title.localeCompare(b.title));
+ for(const t of items){
+  const r=findMonth(t),amt=Number(r?.amount??t.amount),warn=structureTwin(t,r);
+  if(t.direction==='uscita'){if(r?.status==='pagato')paid+=amt;else due+=amt}
+  const card=el('div','item'),head=el('div','row');head.append(el('span','name',t.title),el('span','money',money(amt)));card.append(head);
+  card.append(el('div','muted',(t.direction==='entrata'?'Entrata':'Spesa')+' · ogni mese, giorno '+t.day_of_month));
+  card.append(el('span','state'+(r?.status==='pagato'?' ok':''),r?.status==='pagato'?(t.direction==='entrata'?'Incassato':'Pagato'):(r?'Da pagare':'Da registrare')));
+  if(warn)card.append(el('div','warning','Attenzione: è presente una quota struttura di pari importo già pagata. Controlla prima di registrare un secondo pagamento.'));
+  const actions=el('div','actions');
+  const edit=el('button','soft','✏️ Modifica €');edit.onclick=()=>editAmount(t,r,card);actions.append(edit);
+  if(!warn){
+   const pay=el('button','',r?.status==='pagato'?'↩ Annulla pagato':(t.direction==='entrata'?'✓ Incassato':'✓ Segna pagato'));
+   pay.onclick=()=>togglePaid(t,r);actions.append(pay);
+  }
+  card.append(actions);list.append(card);
+ }
+ if(!items.length)list.append(el('p','muted','Non ci sono quote fisse attive per questo mese. Premi “+ Nuova quota” oppure cambia il mese.'));
+ $('paid').textContent=money(paid);$('due').textContent=money(due);
+}
+async function togglePaid(t,r){
+ const next=r?.status==='pagato'?'previsto':'pagato';
+ if(!confirm('Confermi '+t.title+' · '+(next==='pagato'?'pagato':'non pagato')+'?'))return;
+ try{
+  if(!r){await ensureMonth();r=findMonth(t)}
+  if(!r)throw Error('Scadenza non trovata');
+  const item={id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,notes:r.notes||'',amount:Number(r.amount),direction:r.direction,status:next};
+  const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:item});if(error)throw error;await load();msg('Pagamento aggiornato.');
+ }catch(e){msg('Non riuscito: '+e.message)}
+}
+function editAmount(t,r,card){
+ document.querySelectorAll('.edit').forEach(x=>x.remove());
+ const panel=el('div','edit');const title=el('label','', 'Nuovo importo per '+t.title);const input=el('input');input.type='number';input.min='.01';input.step='.01';input.value=r?.amount??t.amount;input.setAttribute('aria-label','Nuovo importo');
+ const label=el('label','','Applica la modifica');const choice=el('select');
+ for(const [val,name] of [['single','Solo questo mese'],['future','Da questo mese e per i prossimi (non quelli pagati)']]){const op=el('option','',name);op.value=val;choice.append(op)}
+ const actions=el('div','actions');actions.style.marginTop='12px';
+ const save=el('button','','Salva importo');const cancel=el('button','soft','Annulla');cancel.onclick=()=>panel.remove();save.onclick=()=>saveAmount(t,r,input.value,choice.value,save);
+ actions.append(save,cancel);panel.append(title,input,label,choice,actions);card.append(panel);input.focus();
+}
+async function saveAmount(t,r,raw,mode,button){
+ const value=Number(String(raw).replace(',','.'));if(!Number.isFinite(value)||value<=0){msg('Inserisci un importo maggiore di zero');return}button.disabled=true;
+ try{
+  if(mode==='future'){
+   const item={id:t.id,title:t.title,category:t.category,amount:value,direction:t.direction,day_of_month:t.day_of_month,start_month:t.start_month,end_month:t.end_month,active:t.active};
+   const {error}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:item,p_apply_future:true,p_from_month:$('month').value});
+   if(error)throw error;
+   if(!r){await ensureMonth()}
+   msg('Quota aggiornata per i mesi futuri non ancora pagati.');
+  }else{
+   if(!r){await ensureMonth();r=findMonth(t)}
+   if(!r)throw Error('Non riesco a trovare la rata del mese');
+   const item={id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,notes:r.notes||'',amount:value,direction:r.direction,status:r.status};
+   const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:item});if(error)throw error;
+   msg('Importo di questo mese aggiornato.');
+  }
+  await load();
+ }catch(e){msg('Non salvato: '+e.message)}finally{button.disabled=false}
+}
+$('new').onclick=()=>{$('newPanel').classList.remove('hide');$('newStart').value=$('month').value;$('newPanel').scrollIntoView({behavior:'smooth'})};
+$('newCancel').onclick=()=>$('newPanel').classList.add('hide');
+$('newForm').onsubmit=async e=>{
+ e.preventDefault();const r={title:$('newName').value.trim(),amount:Number($('newAmount').value),day_of_month:Number($('newDay').value),category:$('newCategory').value,direction:$('newDirection').value,start_month:$('newStart').value+'-01',end_month:$('newEnd').value?$('newEnd').value+'-01':null,active:true};
+ if(r.end_month&&r.end_month<r.start_month){msg('Il mese finale deve essere successivo a quello iniziale');return}
+ $('newSave').disabled=true;
+ try{const {error}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:r,p_apply_future:false,p_from_month:null});if(error)throw error;$('newPanel').classList.add('hide');$('newForm').reset();await ensureMonth();msg('Nuova quota mensile salvata.')}catch(err){msg('Non salvato: '+err.message)}finally{$('newSave').disabled=false}
+};
+(async()=>{const chosen=localStorage.getItem('am_finanze_preferred')||'azienda',saved=localStorage.getItem(key(chosen))||sessionStorage.getItem(key(chosen));$('loginSection').value=chosen;if(saved)await openSection(chosen,saved)})();
+</script></body></html>
