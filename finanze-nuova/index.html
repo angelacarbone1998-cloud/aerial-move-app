@@ -1,676 +1,102 @@
-<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#73205e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="AM Finanze">
-<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><title>Aerial Move Finanze</title>
-<style>
-:root{font-family:system-ui,-apple-system,Arial,sans-serif;background:#faf5f9;color:#271b2b}*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#73205e;color:white;padding:calc(20px + env(safe-area-inset-top)) 18px 20px}h1{font-size:24px;margin:0 0 4px}.wrap{max-width:820px;margin:auto;padding:16px;padding-bottom:80px}.muted{color:#766b75;font-size:13px;line-height:1.55}.hero{color:#fff;font-size:13px;opacity:.9}.card{background:#fff;border:1px solid #eadce8;border-radius:19px;margin:12px 0;padding:18px;box-shadow:0 2px 9px #59365808}h2{margin:0 0 12px;font-size:21px}h3{font-size:17px;margin:0 0 12px}label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}input,select{width:100%;font-size:16px;padding:13px;border-radius:11px;background:#fff;color:#281a29;border:1px solid #d7c4d3}button{background:#73205e;color:white;border:0;border-radius:12px;padding:13px 17px;font-weight:650;font-size:15px;cursor:pointer}button.alt{background:#f1e5ee;color:#652154}button.red{background:#fff0f1;color:#9b2b40}button:disabled{opacity:.5}button.full{width:100%}.row{display:flex;align-items:center;gap:9px;justify-content:space-between;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#f6eef4;padding:14px;border-radius:14px}.metric span{font-size:12px;color:#6f5d6a}.metric b{display:block;font-size:20px;margin-top:5px;word-break:break-word}.positive{color:#08774c}.negative{color:#ae3050}.tabs{display:flex;gap:8px;margin:10px 0}.tabs button{flex:1;padding:13px 4px}.item{border-top:1px solid #eee;padding:14px 0}.item:first-child{border-top:0}.item-main{display:flex;justify-content:space-between;gap:12px}.item-title{font-weight:640}.item-amount{font-weight:700;white-space:nowrap}.item-meta{font-size:12px;color:#736776;margin:4px 0 9px}.item-actions{display:flex;gap:8px}.item-actions button{padding:8px 11px;font-size:12px}.hide{display:none!important}.notice{border-left:3px solid #932b6e;background:#f7eaf2;padding:12px;margin:12px 0;border-radius:8px;font-size:13px;line-height:1.5}canvas{width:100%;height:190px}#toast{position:fixed;bottom:18px;left:18px;right:18px;max-width:790px;margin:auto;padding:14px 16px;border-radius:14px;background:#28192a;color:white;z-index:100;display:none}#topright{align-items:center}footer{text-align:center;font-size:12px;color:#998b96;padding-top:12px}@media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}h1{font-size:29px}} 
-
-/* Dashboard finanziaria mobile: grafici a ciambella accessibili */
-.dashboard-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
-.dashboard-heading h3{margin:0}.dashboard-heading small{color:#7d6e7a}
-.charts-grid{display:grid;grid-template-columns:1fr;gap:13px;margin-top:13px}
-.chart-tile{background:#fff;border:1px solid #eadce8;border-radius:16px;padding:14px;min-width:0}
-.chart-tile h4{font-size:15px;margin:0 0 4px}.chart-caption{font-size:12px;color:#796976;line-height:1.45;margin:0 0 13px;min-height:17px}
-.donut-layout{display:flex;gap:15px;align-items:center;flex-wrap:wrap;justify-content:center}
-.donut-ring{width:152px;height:152px;position:relative;flex:none;border-radius:50%;background:#eee5ec}
-.donut-hole{position:absolute;inset:29px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5px}
-.donut-hole b{font-size:17px;line-height:1.2}.donut-hole small{font-size:11px;color:#7a6b78}
-.donut-legend{flex:1;min-width:120px;width:100%;display:flex;flex-direction:column;gap:8px}
-.donut-legend-row{display:flex;gap:7px;align-items:flex-start;font-size:12px;justify-content:space-between}
-.legend-dot{flex:none;width:10px;height:10px;border-radius:4px;margin-top:3px}
-.legend-name{flex:1;overflow-wrap:anywhere;color:#493749}.legend-sum{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
-.insights-list{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-.insight-tile{border-radius:12px;background:#f7f0f6;padding:12px 13px}
-.insight-title{display:block;font-size:12px;color:#756474;margin-bottom:5px}
-.insight-value{display:block;font-size:14px;font-weight:730;overflow-wrap:anywhere}
-.insight-note{font-size:12px;color:#756474;line-height:1.4;margin-top:4px}
-#appUpdated{font-size:12px;color:#796976;margin-top:10px}
-@media(min-width:620px){.charts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.insights-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-/* budget, soglie e avvisi */
-.budget-hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.budget-stat{padding:13px;border-radius:14px;background:#f6eef5;border:1px solid #eadce7;min-width:0}
-.budget-stat.primary{background:#f4e5f0;border-color:#ddc4d6}
-.budget-stat .k{display:block;color:#715a6c;font-size:12px}
-.budget-stat strong{display:block;font-size:22px;line-height:1.2;margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.budget-alert{margin:12px 0;border-radius:13px;padding:13px 14px;border:1px solid transparent;font-size:14px}
-.budget-alert strong{display:block;margin-bottom:5px}.budget-alert.danger{background:#ffedf0;border-color:#ecb4c0;color:#9c263f}
-.budget-alert.warn{background:#fff4da;border-color:#f1dba3;color:#815a12}
-.budget-alert.good{background:#ebf6ef;border-color:#cbe6d5;color:#165e37}
-.budget-alert small{display:block;line-height:1.4;margin-top:5px}
-.budget-settings{margin-top:14px;border-top:1px solid #e9dee6;padding-top:9px}
-.budget-settings summary{cursor:pointer;font-size:14px;color:#72245c;font-weight:700;padding:9px 0}
-.budget-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 13px}
-.budget-settings-grid input{max-width:100%}
-.budget-note{font-size:12px;color:#776b76;line-height:1.5}
-@media(max-width:360px){.budget-hero,.budget-settings-grid{grid-template-columns:1fr}}
-
-.credit-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
-.credit-summary-box{background:#f8eff6;padding:11px;border-radius:13px;min-width:0}
-.credit-summary-box span{display:block;font-size:11px;color:#705c6d;line-height:1.3}
-.credit-summary-box strong{display:block;font-size:17px;font-variant-numeric:tabular-nums;margin-top:6px;overflow-wrap:anywhere}
-.credit-summary-box.emphasis{background:#f0e2ee}
-.credit-track{width:100%;height:9px;background:#ecdfeb;border-radius:20px;overflow:hidden}
-#creditProgress{width:0%;height:100%;background:#822d6d;border-radius:20px;transition:width .18s ease-out}
-.credit-subtitle{font-size:15px;margin:20px 0 10px}
-.credit-breakdown-line,.credit-history-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #eee1eb;align-items:start}
-.credit-breakdown-line:last-child,.credit-history-line:last-child{border-bottom:0}
-.credit-breakdown-line .credit-name,.credit-history-line .credit-name{font-weight:620;font-size:14px}
-.credit-amount{font-weight:720;white-space:nowrap;font-variant-numeric:tabular-nums}
-.credit-detail{font-size:12px;color:#796d78;margin-top:4px}
-.credit-history{margin-top:10px}
-@media(max-width:390px){.credit-summary-box{padding:8px}.credit-summary-box strong{font-size:15px}}
-</style></head><body>
-<header><div class="row"><div><h1>✦ Aerial Move Finanze</h1><div class="hero">Entrate · Uscite · Piano di accumulo</div></div><div class="row" id="topright"><button type="button" class="alt" id="refresh">↻ Aggiorna</button><button type="button" class="alt hide" id="logout">Esci</button></div></div></header>
-<main class="wrap">
-<section id="loginCard" class="card"><h2>Benvenuta</h2><p class="muted">Un'app separata dalla palestra. Usa le password delle sezioni: non sono richieste email ad ogni accesso.</p>
-<label for="loginLedger">Quale gestione vuoi aprire?</label><select id="loginLedger"><option value="azienda">Aerial Move</option><option value="personale">Personale Angela</option></select>
-<label for="loginPass">Password della sezione</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="La password già impostata">
-<label style="font-weight:400"><input type="checkbox" id="remember" checked style="width:auto;vertical-align:middle"> Ricorda l'accesso su questo dispositivo (fino a 7 giorni)</label>
-<button type="button" class="full" id="loginButton" style="margin-top:15px">Accedi</button>
-<p class="muted" id="loginHelp">Se hai già una password per questa sezione, usala per accedere.</p>
-<div id="personalFirstSetup" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
- <h3>Prima attivazione Personale Angela</h3>
- <p class="muted">Non serve un'email. Per autorizzare l'attivazione, usa la password Aerial Move già funzionante e scegli una nuova password personale.</p>
- <label for="setupCompanyPass">Password Aerial Move</label><input id="setupCompanyPass" type="password" autocomplete="off" placeholder="Password aziendale già creata">
- <label for="setupPersonalPass">Nuova password Personale Angela</label><input id="setupPersonalPass" type="password" minlength="10" autocomplete="new-password" placeholder="Almeno 10 caratteri">
- <label for="setupPersonalConfirm">Ripeti la nuova password personale</label><input id="setupPersonalConfirm" type="password" minlength="10" autocomplete="new-password">
- <button id="activatePersonal" type="button" class="full" style="margin-top:14px">Attiva e apri Personale Angela</button>
- <p id="activationError" class="notice hide" role="alert"></p>
-</div>
-<button type="button" class="alt" id="showPersonalSetup" style="margin-top:10px">Attiva per la prima volta Personale Angela</button>
-<button type="button" class="alt" id="forgotPersonal" style="margin-top:10px">Password dimenticata? Personale Angela</button>
-<button type="button" class="alt" id="forgotCompany" style="margin-top:10px">Password dimenticata? Aerial Move</button>
-<div id="recoverCompanyPanel" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
-<h3>Recupera password Aerial Move</h3>
-<p class="muted">Per proteggere i dati finanziari occorre verificare l'email autorizzata. Non ti verranno richieste le vecchie password.</p>
-<button type="button" class="full" id="sendCompanyRecovery">Invia email per reimpostare la password</button>
-<p class="muted">L'email può impiegare qualche minuto. Se l'invio è temporaneamente bloccato, non richiederlo ripetutamente.</p>
-<details style="margin-top:12px">
- <summary style="font-size:13px;color:#70235b;font-weight:650;cursor:pointer">Il link apre una pagina sbagliata?</summary>
- <p class="muted">Dalla mail copia il collegamento di recupero senza aprirlo e incollalo qui. Non condividerlo con nessuno.</p>
- <label for="companyRecoveryLink">Collegamento ricevuto via email</label>
- <input id="companyRecoveryLink" type="password" autocomplete="off" placeholder="Incolla il link di recupero">
- <button type="button" class="alt" id="verifyCompanyRecoveryLink" style="margin-top:9px">Verifica il link qui</button>
-</details>
-<div id="companyRecoveryNewPanel" class="hide" style="margin-top:16px;border-top:1px solid #e0cfdd;padding-top:10px">
- <h4 style="margin:0 0 10px">Imposta la nuova password Aerial Move</h4>
- <label for="companyNewPassword">Nuova password (almeno 10 caratteri)</label>
- <input id="companyNewPassword" type="password" minlength="10" autocomplete="new-password">
- <label for="companyNewConfirm">Ripeti la nuova password</label>
- <input id="companyNewConfirm" type="password" minlength="10" autocomplete="new-password">
- <button type="button" class="full" id="saveRecoveredCompany" style="margin-top:12px">Reimposta la password Aerial Move</button>
-</div>
-<p class="notice hide" id="companyRecoveryMessage" role="status"></p>
-<button type="button" class="alt" id="cancelCompanyRecovery" style="margin-top:12px">Torna all'accesso</button>
-</div>
-<div id="recoverPersonalPanel" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
-<h3>Reimposta password Personale Angela</h3>
-<p class="muted">Per proteggere i dati, conferma la password aziendale Aerial Move e scegli una nuova password personale. Nessuna email necessaria.</p>
-<label for="recoverCompanyPass">Password Aerial Move</label>
-<input id="recoverCompanyPass" type="password" autocomplete="off" placeholder="Password della sezione Aerial Move">
-<label for="recoverNewPersonalPass">Nuova password personale</label>
-<input id="recoverNewPersonalPass" type="password" autocomplete="new-password" minlength="10" placeholder="Almeno 10 caratteri">
-<label for="recoverConfirmPersonalPass">Conferma nuova password personale</label>
-<input id="recoverConfirmPersonalPass" type="password" autocomplete="new-password" minlength="10">
-<button type="button" id="confirmPersonalRecovery" class="full" style="margin-top:15px">Reimposta la password personale</button>
-<button type="button" id="cancelPersonalRecovery" class="alt" style="margin-top:9px">Annulla</button>
-<p id="recoverPersonalError" class="notice hide" role="alert"></p>
-</div>
-<div id="error" role="alert" class="notice hide"></div>
-</section>
-<section id="dashboard" class="hide">
-<div class="row" style="margin-bottom:8px"><h2 id="sectionTitle">Aerial Move</h2><button type="button" class="alt" id="switch">Cambia sezione</button></div>
-<div class="card"><div class="row"><h3>Riepilogo mensile</h3><input type="month" id="month" style="width:160px"></div>
-<div class="grid" id="metrics"></div><p class="muted">Il saldo riguarda i movimenti segnati come effettuati; non sostituisce il saldo bancario.</p></div>
-<div class="card" id="budgetCard">
- <div class="dashboard-heading"><h3>Quanto puoi spendere questo mese?</h3><small id="budgetMonth"></small></div>
- <p class="muted">Stima basata su entrate incassate e previste, uscite già pagate e pagamenti ancora da fare. Non corrisponde al saldo bancario.</p>
- <div id="budgetAlert" class="budget-alert good" role="status" aria-live="polite"></div>
- <div class="budget-hero">
-  <div class="budget-stat"><span class="k">Budget totale del mese</span><strong id="budgetTotal">0 €</strong></div>
-  <div class="budget-stat"><span class="k">Già speso o impegnato</span><strong id="budgetCommitted">0 €</strong></div>
-  <div class="budget-stat primary"><span class="k">Puoi ancora spendere</span><strong id="budgetRemaining">0 €</strong></div>
-  <div class="budget-stat"><span class="k">Entrate del mese (anche previste)</span><strong id="budgetIncome">0 €</strong></div>
- </div>
- <p class="budget-note" id="budgetFormula"></p>
- <details class="budget-settings" id="budgetOptions">
-  <summary>Imposta risparmio, limite e avvisi</summary>
-  <p class="budget-note">Impostazioni indipendenti per ciascun mese e per ciascuna sezione. Si salvano online.</p>
-  <form id="budgetForm"><div class="budget-settings-grid">
-   <div><label for="budgetOpening">Fondi disponibili a inizio mese (€)</label><input id="budgetOpening" type="number" step="0.01" placeholder="0" required></div>
-   <div><label for="budgetReserve">Somma da tenere da parte (€)</label><input id="budgetReserve" type="number" step="0.01" min="0" placeholder="0" required></div>
-   <div><label for="budgetThreshold">Soglia di avviso: avvisami sotto (€)</label><input id="budgetThreshold" type="number" step="0.01" min="0" placeholder="100" required></div>
-   <div><label for="budgetCap">Limite massimo spese del mese (€)</label><input id="budgetCap" type="number" step="0.01" min="0" placeholder="Facoltativo"></div>
-  </div><button type="submit" id="saveBudget" style="margin-top:13px">Salva budget e avvisi</button></form>
- </details>
-</div>
-<div class="card" id="visualDashboard">
-<div class="dashboard-heading"><h3>Le tue finanze a colpo d'occhio</h3><small id="chartsMonth"></small></div>
-<p class="muted">Grafici calcolati automaticamente dai movimenti del mese. I pagamenti effettuati sono distinti da quelli previsti.</p>
-<div class="charts-grid">
- <div class="chart-tile"><h4>Spese per categoria</h4><p class="chart-caption">Dove si concentrano le uscite del mese</p><div id="pieCategories"></div></div>
- <div class="chart-tile"><h4>Pagato / da pagare</h4><p class="chart-caption">Stato delle spese registrate</p><div id="pieStatus"></div></div>
- <div class="chart-tile"><h4>Entrate / uscite</h4><p class="chart-caption">Confronto dei movimenti del mese, previsti e realizzati</p><div id="pieFlow"></div></div>
- <div class="chart-tile"><h4 id="pieExtraTitle">Riepilogo aggiuntivo</h4><p class="chart-caption" id="pieExtraDesc"></p><div id="pieExtra"></div></div>
-</div></div>
-<div class="card"><h3>In breve</h3><div class="insights-list" id="insights"></div><p class="muted" id="appUpdated"></p></div>
-<div class="card"><h3>Curva di accumulo</h3><p class="muted">Progressione delle entrate meno le uscite effettivamente registrate. Non rappresenta il saldo del conto bancario.</p><canvas id="graph" width="740" height="215"></canvas></div>
-<div class="card" id="creditPanel">
-<h3 id="creditHeading">Credito Angela verso Aerial Move</h3>
-<p class="muted" id="creditIntro">Riepilogo degli anticipi personali che Aerial Move deve restituire ad Angela. Questo credito non è un'entrata già incassata.</p>
-<div class="credit-summary">
- <div class="credit-summary-box"><span>Totale anticipato</span><strong id="creditTotal">1.512,00 €</strong></div>
- <div class="credit-summary-box"><span id="creditPaidLabel">Già rimborsato</span><strong id="creditPaid">0,00 €</strong></div>
- <div class="credit-summary-box emphasis"><span id="creditRemainingLabel">Ancora da ricevere</span><strong id="creditDue">1.512,00 €</strong></div>
-</div>
-<div class="credit-track" aria-label="Avanzamento del rimborso"><div id="creditProgress"></div></div>
-<p class="muted" id="creditProgressCaption">0% rimborsato</p>
-<h4 class="credit-subtitle">Da cosa è composto il credito</h4>
-<div id="creditBreakdown" class="credit-breakdown"></div>
-<div class="credit-history">
- <h4 class="credit-subtitle" id="creditHistoryHeading">Rimborsi già ricevuti</h4>
- <div id="creditHistory" class="credit-history-list"></div>
-</div>
-<button type="button" id="recordCreditPayment" class="alt" style="margin-top:13px">+ Registra rimborso ricevuto</button>
-<p class="muted" id="creditFootnote">Registra un rimborso solo quando i soldi arrivano davvero. La voce iniziale da 1.512 € rimane un credito da incassare, non va segnata come incassata insieme ai rimborsi parziali.</p>
-</div>
-<div class="card" id="setupPanel"><h3>Attiva la sezione Personale</h3><p class="muted">La sezione personale non ha ancora una password registrata. Creane una distinta da quella aziendale (minimo 10 caratteri). Puoi farlo soltanto dopo essere entrata con la password Aerial Move.</p><label for="personalPass">Nuova password personale</label><input type="password" id="personalPass" autocomplete="new-password" placeholder="Nuova password personale"><button type="button" class="full" id="setupPersonal" style="margin-top:12px">Attiva Personale</button></div>
-<div class="card"><h3 id="formTitle">Nuovo movimento</h3><form id="form"><input type="hidden" id="editId"><div class="grid">
-<div><label for="date">Data</label><input id="date" type="date" required></div>
-<div><label for="amount">Importo €</label><input id="amount" type="number" step=".01" min=".01" required></div>
-<div><label for="direction">Tipo</label><select id="direction"><option value="uscita">Uscita</option><option value="entrata">Entrata</option></select></div>
-<div><label for="status">Stato</label><select id="status"><option value="previsto">Da pagare/incassare</option><option value="pagato">Effettuato</option></select></div>
-</div><label for="title">Descrizione</label><input id="title" required placeholder="Es. Quota corso o rata"><label for="category">Categoria</label><select id="category"><option>Affitto</option><option>Collaboratori</option><option>Rate</option><option>Fornitori</option><option>Attività</option><option>Stipendio</option><option>Rimborso Angela</option><option>Alimentari</option><option>Carburante</option><option>Utenze</option><option>Altro</option></select><label for="notes">Note</label><input id="notes" placeholder="Facoltative"><div class="row" style="margin-top:14px"><button type="submit" id="save">Salva movimento</button><button type="button" class="alt" id="cancel">Annulla</button></div></form></div>
-<div class="card"><div class="row"><h3>Movimenti e scadenze</h3><button type="button" class="alt" id="export">Esporta CSV</button></div><div class="tabs"><button class="alt" id="filterAll">Tutti</button><button class="alt" id="filterDue">Da pagare</button><button class="alt" id="filterPaid">Effettuati</button></div><div id="items"></div></div>
-<div class="card"><h3>Dati del piano iniziale</h3><p class="muted">Puoi caricare una sola volta le spese e le entrate che abbiamo già elencato. Saranno indicate come <b>previste</b>, mai come pagate. Verifica le scadenze non confermate.</p><button type="button" class="alt" id="seed">Carica i dati iniziali</button></div>
-</section>
-<footer>Versione nuova · Dati salvati nel database, non nel file HTML</footer>
-</main><div id="toast" role="status"></div>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#74215e"><link rel="manifest" href="./manifest.webmanifest"><title>Aerial Move Finanze · Semplice</title><style>
+*{box-sizing:border-box}body{margin:0;background:#fbf8fb;color:#30253a;font:15px system-ui,-apple-system,sans-serif}header{background:#74215e;color:white;padding:22px 18px}h1{font-size:22px;margin:0}header small{opacity:.8}.wrap{max-width:740px;margin:auto;padding:14px 15px 80px}.card{background:white;border:1px solid #eadfe9;border-radius:18px;margin:12px 0;padding:17px;box-shadow:0 2px 8px #35182f08}h2{font-size:19px;margin:0 0 7px}p{line-height:1.5}.muted{font-size:13px;color:#7b6b7b}label{display:block;font-weight:650;font-size:13px;margin:11px 0 6px}input,select{background:white;color:#312132;width:100%;padding:12px;border:1px solid #d9c7d6;border-radius:10px;font:inherit}button{font:inherit;font-size:14px;font-weight:680;border:0;background:#74215e;color:white;padding:12px 14px;border-radius:11px;cursor:pointer}button:disabled{opacity:.5}button.soft{background:#f0e6ef;color:#6d2459}button.ghost{background:white;color:#74215e;border:1px solid #dfccdc}.row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hide{display:none!important}.seg{display:flex;gap:8px}.seg button{flex:1}.seg button:not(.active){background:#efe5ed;color:#724866}.stat{padding:13px;background:#f8f0f6;border-radius:12px}.stat label{margin:0;font-size:12px;color:#715f70}.stat strong{font-size:22px;display:block;margin-top:5px;overflow-wrap:anywhere}.item{padding:15px 0;border-top:1px solid #f0e8ed}.item:first-child{border-top:0}.name{font-size:16px;font-weight:720}.money{font-size:19px;font-weight:750;white-space:nowrap}.state{font-size:12px;font-weight:700;border-radius:20px;background:#ffefd6;color:#855a19;padding:5px 8px;display:inline-block;margin:7px 0}.state.ok{color:#17623c;background:#e7f6ed}.warning{border-radius:12px;background:#fff3e1;color:#815b16;font-size:13px;padding:12px;margin:9px 0}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{padding:10px 12px;font-size:13px}.edit{background:#faf5f9;padding:14px;border-radius:14px;margin:12px 0}.editgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.edit input{font-size:16px}.intro{background:#f7edf5;border-radius:14px;padding:12px;color:#643c5a;font-size:13px}.navlink{color:#71305f;font-weight:700;text-decoration:none}.full{width:100%}#message{position:fixed;bottom:14px;left:14px;right:14px;max-width:710px;margin:auto;background:#2f2431;color:white;padding:14px;border-radius:13px;display:none;z-index:10}summary{cursor:pointer;color:#70305d;font-weight:650}.tag{font-size:12px;color:#765c71} @media(max-width:365px){.grid,.editgrid{grid-template-columns:1fr}}
+</style></head><body><header><h1>✦ Aerial Move Finanze</h1><small>Pagamenti chiari, senza schermate complicate</small></header><main class="wrap">
+<section id="login" class="card"><h2>Accedi alle tue finanze</h2><p class="muted">Le due sezioni hanno password indipendenti.</p><label>Sezione</label><select id="loginSection"><option value="azienda">Aerial Move</option><option value="personale">Personale Angela</option></select><label>Password</label><input type="password" id="password" autocomplete="current-password"><button id="enter" class="full" style="margin-top:13px">Entra</button><p class="muted">Per recuperare una password usa <a class="navlink" href="./avanzato.html">Password dimenticata</a>.</p></section>
+<section id="main" class="hide">
+<div class="card"><div class="seg"><button id="company" class="active">Aerial Move</button><button id="personal">Personale Angela</button></div><label for="month">Mese da gestire</label><input id="month" type="month"></div>
+<div class="card"><h2>Il mese in breve</h2><div class="grid"><div class="stat"><label>Ancora da pagare</label><strong id="due">—</strong></div><div class="stat"><label>Già pagato</label><strong id="paid">—</strong></div></div><p class="muted">Totali delle quote fisse di questo mese. Le entrate fisse sono elencate sotto separatamente.</p></div>
+<div class="card"><div class="row"><h2>Le quote mensili</h2><button id="new" class="soft">+ Nuova quota</button></div><p class="muted">Per cambiare una cifra premi <b>Modifica €</b> sulla sua riga. Puoi scegliere se modificare soltanto questo mese oppure anche i prossimi.</p><div id="items"></div><div class="row"><button id="prepare" class="soft">Crea quote mancanti</button><button id="reload" class="ghost">↻ Aggiorna</button></div></div>
+<div id="newPanel" class="card hide"><h2>Nuova quota mensile</h2><form id="newForm"><label>Nome</label><input id="newName" required placeholder="Es. Commercialista"><div class="editgrid"><div><label>Importo €</label><input id="newAmount" type="number" min=".01" step=".01" required></div><div><label>Giorno</label><input id="newDay" type="number" min="1" max="28" value="5" required></div><div><label>Categoria</label><select id="newCategory"><option>Collaboratori</option><option>Affitto</option><option>Rate</option><option>Utenze</option><option>Fornitori</option><option>Stipendio</option><option>Altro</option></select></div><div><label>Tipo</label><select id="newDirection"><option value="uscita">Spesa</option><option value="entrata">Entrata</option></select></div><div><label>Da mese</label><input id="newStart" type="month" required></div><div><label>Fino al (opzionale)</label><input id="newEnd" type="month"></div></div><div class="row" style="margin-top:14px"><button type="submit" id="newSave">Salva nuova quota</button><button id="newCancel" type="button" class="soft">Annulla</button></div></form></div>
+<div class="card"><h2>Altre informazioni</h2><p class="muted">Grafici, budget, credito Angela, singoli movimenti e password restano disponibili nella versione completa.</p><a id="advanced" class="navlink" href="./avanzato.html">Apri grafici e gestione completa →</a></div>
+<div class="row"><button id="logout" class="soft">Esci</button></div></section></main><div id="message" role="status"></div>
 <script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
 const db=createClient('https://ztskaqyudcamdailxdef.supabase.co','sb_publishable_EohjiHILTe57ttNQHtXw8A_Tdz_-Rvr');
-const $=id=>document.getElementById(id);
-const euros=n=>Number(n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
-const today=new Date().toLocaleDateString('en-CA');$('month').value=today.slice(0,7);$('date').value=today;
-let ledger='azienda',token='',rows=[],filter='all',remember=true;
-const emptyBudget=()=>({opening_funds:0,reserve_amount:0,alert_threshold:100,spending_cap:null});
-let monthlyBudget=emptyBudget();
-let toastTimer;function say(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',5200)}
-function message(s){$('error').textContent=s;$('error').classList.remove('hide')}
-function loginView(){token='';rows=[];$('loginCard').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');$('loginButton').disabled=false;$('loginPass').value='';$('loginLedger').value=ledger;$('error').classList.add('hide');refreshSetup()}
-function savedKey(l){return 'am_finanze_v2_'+l}
-async function openSection(t,l){token=t;ledger=l;monthlyBudget=emptyBudget();$('dashboard').classList.remove('hide');$('loginCard').classList.add('hide');$('logout').classList.remove('hide');$('sectionTitle').textContent=l==='azienda'?'Aerial Move':'Personale Angela';$('setupPanel').classList.toggle('hide',l!=='azienda');filter='all';await load()}
-async function signIn(l,p){$('loginButton').disabled=true;$('error').classList.add('hide');if(p.length<8){message('Inserisci la password della sezione.');$('loginButton').disabled=false;return}try{const{data,error}=await db.rpc('finanze_login_direct',{p_ledger:l,p_password:p});if(error)throw error;if(!data){message('Password non riconosciuta o accesso temporaneamente limitato. Se conosci la password di Aerial Move, seleziona quella sezione.');return}if($('remember').checked)localStorage.setItem(savedKey(l),data);else sessionStorage.setItem(savedKey(l),data);await openSection(data,l)}catch(e){message('Accesso non riuscito: '+e.message)}finally{$('loginButton').disabled=false}}
-$('loginButton').onclick=()=>signIn($('loginLedger').value,$('loginPass').value);
-$('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')signIn($('loginLedger').value,$('loginPass').value)});
-function refreshSetup(){
-const personal=$('loginLedger').value==='personale';
-$('showPersonalSetup').classList.toggle('hide',!personal);
-$('forgotPersonal').classList.toggle('hide',!personal);
-$('forgotCompany').classList.toggle('hide',personal);
-if(!personal){$('personalFirstSetup').classList.add('hide');$('recoverPersonalPanel').classList.add('hide')}
-if(personal)$('recoverCompanyPanel').classList.add('hide');
-}
-$('showPersonalSetup').onclick=()=>{$('recoverPersonalPanel').classList.add('hide');$('personalFirstSetup').classList.toggle('hide');$('activationError').classList.add('hide')};
-$('forgotPersonal').onclick=()=>{
-$('personalFirstSetup').classList.add('hide');
-$('recoverPersonalPanel').classList.toggle('hide');
-$('recoverPersonalError').classList.add('hide');
-};
-
-const approvedRecoveryEmail='angelacarbone1998@gmail.com';
-function companyRecoveryNotice(message){
- $('companyRecoveryMessage').textContent=message;
- $('companyRecoveryMessage').classList.remove('hide');
-}
-async function verifiedRecoveryIdentity(){
- const {data,error}=await db.auth.getUser();
- return !error&&data?.user?.email?.toLowerCase()===approvedRecoveryEmail;
-}
-async function updateCompanyRecoveryState(){
- const verified=await verifiedRecoveryIdentity();
- $('companyRecoveryNewPanel').classList.toggle('hide',!verified);
- return verified;
-}
-$('forgotCompany').onclick=async()=>{
- $('recoverCompanyPanel').classList.toggle('hide');
- $('personalFirstSetup').classList.add('hide');
- $('recoverPersonalPanel').classList.add('hide');
- $('companyRecoveryMessage').classList.add('hide');
- if(!$('recoverCompanyPanel').classList.contains('hide'))await updateCompanyRecoveryState();
-};
-$('cancelCompanyRecovery').onclick=()=>{
- $('recoverCompanyPanel').classList.add('hide');
- $('companyRecoveryLink').value='';
- $('companyNewPassword').value='';
- $('companyNewConfirm').value='';
-};
-$('sendCompanyRecovery').onclick=async()=>{
- $('sendCompanyRecovery').disabled=true;
- try{
-  const target=new URL(location.pathname,location.origin).href;
-  const {error}=await db.auth.resetPasswordForEmail(approvedRecoveryEmail,{redirectTo:target});
-  if(error)throw error;
-  companyRecoveryNotice('Richiesta inviata. Apri la mail di recupero e segui il link. Se l’app apre la pagina sbagliata, usa il campo “Collegamento ricevuto” qui sopra.');
- }catch(err){
-  const limited=/rate limit|too many|429/i.test(err?.message||'');
-  companyRecoveryNotice(limited?'Troppi invii: attendi che termini il blocco prima di richiedere un altro link.':'Email non inviata: '+(err?.message||'riprova più tardi'));
- }finally{$('sendCompanyRecovery').disabled=false}
-};
-$('verifyCompanyRecoveryLink').onclick=async()=>{
- const value=$('companyRecoveryLink').value.trim();
- if(!value){companyRecoveryNotice('Incolla il collegamento ricevuto via email.');return}
- $('verifyCompanyRecoveryLink').disabled=true;
- try{
-  const link=new URL(value);
-  const allowed=new URL('https://ztskaqyudcamdailxdef.supabase.co');
-  if(link.origin!==allowed.origin||!link.pathname.startsWith('/auth/v1/verify'))throw Error('Questo non è il link di verifica dell’account.');
-  const code=link.searchParams.get('token_hash')||link.searchParams.get('token');
-  if(!code||link.searchParams.get('type')!=='recovery')throw Error('Il collegamento non contiene un codice di recupero valido.');
-  const {error}=await db.auth.verifyOtp({type:'recovery',token_hash:code});
-  if(error)throw error;
-  $('companyRecoveryLink').value='';
-  if(await updateCompanyRecoveryState()){
-   companyRecoveryNotice('Email verificata. Imposta ora una nuova password Aerial Move.');
-  }else{companyRecoveryNotice('Verifica incompleta. Riapri il link nello stesso browser.')}
- }catch(err){companyRecoveryNotice('Collegamento non valido, scaduto o già utilizzato. '+(err?.message||''))}
- finally{$('verifyCompanyRecoveryLink').disabled=false}
-};
-$('saveRecoveredCompany').onclick=async()=>{
- const p=$('companyNewPassword').value;
- const confirm=$('companyNewConfirm').value;
- if(p.length<10||p.length>128){companyRecoveryNotice('La nuova password deve contenere da 10 a 128 caratteri.');return}
- if(p!==confirm){companyRecoveryNotice('Le due password non coincidono.');return}
- if(!await verifiedRecoveryIdentity()){companyRecoveryNotice('Per reimpostare la password devi prima verificare la tua email.');return}
- $('saveRecoveredCompany').disabled=true;
- try{
-  const {data,error}=await db.rpc('finanze_reset_password',{p_ledger:'azienda',p_new_password:p});
-  if(error||!data)throw error||new Error('La reimpostazione non è riuscita.');
-  localStorage.removeItem(savedKey('azienda'));
-  sessionStorage.removeItem(savedKey('azienda'));
-  $('companyNewPassword').value='';
-  $('companyNewConfirm').value='';
-  $('recoverCompanyPanel').classList.add('hide');
-  try{await db.auth.signOut({scope:'local'})}catch(e){console.warn('Local auth sign out',e)}
-  say('Password Aerial Move aggiornata! Accedi con la nuova password.');
-  ledger='azienda';loginView();
- }catch(err){companyRecoveryNotice('Impossibile reimpostare la password: '+(err?.message||'errore'))}
- finally{$('saveRecoveredCompany').disabled=false}
-};
-db.auth.onAuthStateChange((event,current)=>{
- if(event==='PASSWORD_RECOVERY'&&current?.user){
-  setTimeout(async()=>{
-   ledger='azienda';$('loginLedger').value='azienda';
-   $('dashboard').classList.add('hide');$('loginCard').classList.remove('hide');
-   refreshSetup();$('recoverCompanyPanel').classList.remove('hide');
-   if(await updateCompanyRecoveryState())companyRecoveryNotice('Email verificata. Scegli una nuova password Aerial Move.');
-  },0);
- }
-});
-$('cancelPersonalRecovery').onclick=()=>{
-$('recoverPersonalPanel').classList.add('hide');
-$('recoverCompanyPass').value='';
-$('recoverNewPersonalPass').value='';
-$('recoverConfirmPersonalPass').value='';
-};
-$('confirmPersonalRecovery').onclick=async()=>{
- const biz=$('recoverCompanyPass').value;
- const personal=$('recoverNewPersonalPass').value;
- const confirmation=$('recoverConfirmPersonalPass').value;
- const fail=m=>{$('recoverPersonalError').textContent=m;$('recoverPersonalError').classList.remove('hide')};
- $('recoverPersonalError').classList.add('hide');
- if(biz.length<8)return fail('Inserisci la password di Aerial Move.');
- if(personal.length<10)return fail('La nuova password personale deve avere almeno 10 caratteri.');
- if(personal!==confirmation)return fail('Le due nuove password non coincidono.');
- if(personal===biz)return fail('La password personale deve essere diversa da quella aziendale.');
- $('confirmPersonalRecovery').disabled=true;
- let temporaryToken=null;
- try{
-  const result=await db.rpc('finanze_login_direct',{p_ledger:'azienda',p_password:biz});
-  if(result.error)throw result.error;
-  if(!result.data){fail('Password Aerial Move non riconosciuta o troppi tentativi. Attendi 15 minuti prima di riprovare.');return}
-  temporaryToken=result.data;
-  const reset=await db.rpc('finanze_reset_personal_by_azienda',{p_token:temporaryToken,p_new_password:personal});
-  if(reset.error)throw reset.error;
-  if(!reset.data){fail('Reimpostazione non riuscita. Verifica che la nuova password sia diversa da quella aziendale.');return}
-  localStorage.removeItem(savedKey('personale'));
-  sessionStorage.removeItem(savedKey('personale'));
-  $('recoverCompanyPass').value='';
-  $('recoverNewPersonalPass').value='';
-  $('recoverConfirmPersonalPass').value='';
-  $('recoverPersonalPanel').classList.add('hide');
-  say('Password personale reimpostata. Accesso in corso…');
-  await signIn('personale',personal);
- }catch(e){fail('Impossibile reimpostare la password: '+(e?.message||'Errore'))}
- finally{
-  if(temporaryToken){await db.rpc('finanze_direct_logout',{p_token:temporaryToken}).catch(()=>{})}
-  $('confirmPersonalRecovery').disabled=false;
- }
-};
-
-$('activatePersonal').onclick=async()=>{
- const biz=$('setupCompanyPass').value,pass=$('setupPersonalPass').value,confirm=$('setupPersonalConfirm').value;
- const fail=m=>{$('activationError').textContent=m;$('activationError').classList.remove('hide')};
- $('activationError').classList.add('hide');
- if(biz.length<8)return fail('Inserisci la password Aerial Move già utilizzata.');
- if(pass.length<10)return fail('La nuova password personale deve contenere almeno 10 caratteri.');
- if(pass!==confirm)return fail('Le due password personali non coincidono.');
- if(pass===biz)return fail('Usa una password personale diversa da quella aziendale.');
- $('activatePersonal').disabled=true;
- let temporaryToken=null;
- try{
-  const login=await db.rpc('finanze_login_direct',{p_ledger:'azienda',p_password:biz});
-  if(login.error)throw login.error;
-  if(!login.data)return fail('Password Aerial Move non riconosciuta, oppure troppi tentativi. Non continuare a riprovare: attendi 15 minuti se necessario.');
-  temporaryToken=login.data;
-  const setup=await db.rpc('finanze_initialize_personal',{p_token:temporaryToken,p_new_password:pass});
-  if(setup.error)throw setup.error;
-  if(!setup.data)return fail('La sezione personale risulta già attivata. Prova ad accedere con la password personale preesistente.');
-  $('setupCompanyPass').value='';$('setupPersonalPass').value='';$('setupPersonalConfirm').value='';
-  $('personalFirstSetup').classList.add('hide');
-  say('Password personale creata. Accesso in corso…');
-  await signIn('personale',pass);
- }catch(e){fail('Attivazione non riuscita: '+(e?.message||'errore sconosciuto'))}
- finally{
-  if(temporaryToken)await db.rpc('finanze_direct_logout',{p_token:temporaryToken}).catch(()=>{});
-  $('activatePersonal').disabled=false;
- }
-};
-refreshSetup();
-async function logout(){if(token)await db.rpc('finanze_direct_logout',{p_token:token});localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView()}
-$('logout').onclick=logout;$('switch').onclick=async()=>{let other=ledger==='azienda'?'personale':'azienda';let t=localStorage.getItem(savedKey(other))||sessionStorage.getItem(savedKey(other));if(t){await openSection(t,other)}else{ledger=other;loginView()}}
-$('refresh').onclick=()=>{const u=new URL(location.href);u.searchParams.set('v',String(Date.now()));location.replace(u.href)};
-$('setupPersonal').onclick=async()=>{const p=$('personalPass').value;if(p.length<10){say('Usa una password personale di almeno 10 caratteri');return}const{data,error}=await db.rpc('finanze_initialize_personal',{p_token:token,p_new_password:p});$('personalPass').value='';if(error){say(error.message);return}if(!data){say('La password personale potrebbe essere già stata impostata. Usa Cambia sezione per accedere.');return}$('setupPanel').classList.add('hide');say('Accesso Personale attivato! Premi Cambia sezione e inserisci la nuova password.')}
-async function load(){try{const{data,error}=await db.rpc('finanze_direct_read',{p_token:token});if(error)throw error;rows=data||[];await loadBudgetSettings();lastSync=Date.now();render()}catch(e){localStorage.removeItem(savedKey(ledger));sessionStorage.removeItem(savedKey(ledger));loginView();message('Sessione scaduta. Inserisci di nuovo la password della sezione.');}}
-
-let lastSync=0,updating=false;
-async function refreshDataQuietly(){
- if(!token||document.hidden||updating||Date.now()-lastSync<10000)return;
- updating=true;
- try{await load();lastSync=Date.now()}finally{updating=false}
-}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDataQuietly()});
-window.addEventListener('focus',refreshDataQuietly);
-setInterval(refreshDataQuietly,90000);
-function sum(a,p){return a.filter(p).reduce((v,r)=>v+Number(r.amount),0)}
-function render(){const month=$('month').value;const r=rows.filter(x=>x.entry_date.slice(0,7)===month);const inPaid=sum(r,x=>x.direction==='entrata'&&x.status==='pagato'),outPaid=sum(r,x=>x.direction==='uscita'&&x.status==='pagato'),inDue=sum(r,x=>x.direction==='entrata'&&x.status==='previsto'&&x.category!=='Rimborso Angela'),outDue=sum(r,x=>x.direction==='uscita'&&x.status==='previsto'&&x.category!=='Rimborso Angela');
-$('metrics').innerHTML=[['Entrate incassate',inPaid],['Spese pagate',outPaid],['Ancora da pagare',outDue],['Saldo registrato',inPaid-outPaid]].map(([name,value])=>'<div class="metric"><span>'+name+'</span><b>'+euros(value)+'</b></div>').join('');
-renderCreditPanel();
-$('items').replaceChildren();let items=rows.filter(x=>filter==='all'||(filter==='due'?x.status==='previsto':x.status==='pagato'));if(!items.length)$('items').textContent='Non ci sono movimenti in questa sezione.';
-for(const r of items){const item=document.createElement('div');item.className='item';const a=document.createElement('div');a.className='item-main';const name=document.createElement('div');name.className='item-title';name.textContent=r.title;const money=document.createElement('span');money.className='item-amount '+(r.direction==='entrata'?'positive':'negative');money.textContent=(r.direction==='entrata'?'+':'−')+euros(r.amount);a.append(name,money);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=r.entry_date+' · '+r.category+' · '+(r.status==='pagato'?'Effettuato':'Previsto');const actions=document.createElement('div');actions.className='item-actions';for(const [label,cb] of [['Modifica',()=>edit(r)],['Elimina',()=>remove(r)]]){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=label;b.onclick=cb;actions.append(b)}item.append(a,meta,actions);$('items').append(item)}draw(month);renderVisuals(r);renderBudget(r)}
-$('month').onchange=async()=>{monthlyBudget=emptyBudget();render();await loadBudgetSettings();render()};
-[['filterAll','all'],['filterDue','due'],['filterPaid','paid']].forEach(([id,value])=>$(id).onclick=()=>{filter=value;render()});
-function draw(month){const c=$('graph'),ctx=c.getContext('2d');const yy=month.slice(0,4);let acc=0;const labels=Array.from({length:12},(_,i)=>yy+'-'+String(i+1).padStart(2,'0')),vals=labels.map(m=>{acc+=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='entrata');acc-=sum(rows,x=>x.status==='pagato'&&x.entry_date.slice(0,7)===m&&x.direction==='uscita');return acc});const min=Math.min(0,...vals),max=Math.max(1,...vals);ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle='#e5d8e2';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=20+i*50;ctx.beginPath();ctx.moveTo(55,y);ctx.lineTo(730,y);ctx.stroke()}ctx.strokeStyle='#8e2a70';ctx.lineWidth=4;ctx.beginPath();vals.forEach((v,i)=>{const x=62+i*60,y=177-(v-min)/(max-min)*150;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.fillStyle='#766476';ctx.font='13px Arial';labels.forEach((m,i)=>{if(i%2===0)ctx.fillText(m.slice(5),57+i*60,210)});ctx.fillText(euros(max),2,14);ctx.fillText(euros(min),2,186)}
-
-const palette=['#74215e','#a84a88','#d680ad','#e9abcb','#6f65ae','#3c9aa0','#e7a254','#9b9ba3'];
-function expenseRows(monthRows){return monthRows.filter(r=>r.direction==='uscita'&&Number(r.amount)>0&&!(r.category==='Rimborso Angela'&&r.status==='previsto'))}
-function incomeRows(monthRows){return monthRows.filter(r=>r.direction==='entrata'&&Number(r.amount)>0&&!(r.category==='Rimborso Angela'&&r.status==='previsto'))}
-function pieDataByCategory(monthRows){
- const buckets=new Map();
- expenseRows(monthRows).forEach(r=>{const name=(r.category||'Altro').trim()||'Altro';buckets.set(name,(buckets.get(name)||0)+Number(r.amount))});
- const ordered=[...buckets.entries()].sort((a,b)=>b[1]-a[1]);
- if(ordered.length<=7)return ordered;
- return [...ordered.slice(0,6),['Altre categorie',ordered.slice(6).reduce((acc,[,n])=>acc+n,0)]];
-}
-function drawDonut(containerId,segments,unitLabel){
- const root=$(containerId);root.replaceChildren();
- const data=segments.filter(([,amount])=>Number(amount)>0);
- const total=data.reduce((acc,[,amount])=>acc+Number(amount),0);
- const frame=document.createElement('div');frame.className='donut-layout';
- const ring=document.createElement('div');ring.className='donut-ring';
- ring.setAttribute('role','img');
- ring.setAttribute('aria-label',total>0?data.map(([name,value])=>name+': '+euros(value)).join(', '):'Nessun movimento disponibile');
- if(total>0){
-  let position=0;
-  const slices=data.map(([,raw],i)=>{const start=position;position+=100*Number(raw)/total;return palette[i%palette.length]+' '+start.toFixed(3)+'% '+position.toFixed(3)+'%'}).join(', ');
-  ring.style.background='conic-gradient('+slices+')';
- }
- const hole=document.createElement('div');hole.className='donut-hole';
- const number=document.createElement('b');number.textContent=euros(total);
- const caption=document.createElement('small');caption.textContent=total>0?unitLabel:'Nessun dato';
- hole.append(number,caption);ring.append(hole);frame.append(ring);
- const legend=document.createElement('div');legend.className='donut-legend';
- if(total===0){const p=document.createElement('p');p.className='muted';p.textContent='Quando registri i movimenti, il grafico si aggiornerà automaticamente.';legend.append(p)}
- data.forEach(([name,value],i)=>{
-  const row=document.createElement('div');row.className='donut-legend-row';
-  const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=palette[i%palette.length];
-  const label=document.createElement('span');label.className='legend-name';label.textContent=name+' · '+Math.round(Number(value)/total*100)+'%';
-  const amount=document.createElement('span');amount.className='legend-sum';amount.textContent=euros(value);
-  row.append(dot,label,amount);legend.append(row);
- });
- frame.append(legend);root.append(frame);
-}
-function insight(title,value,description){
- const card=document.createElement('div');card.className='insight-tile';
- const h=document.createElement('span');h.className='insight-title';h.textContent=title;
- const v=document.createElement('span');v.className='insight-value';v.textContent=value;
- card.append(h,v);
- if(description){const n=document.createElement('div');n.className='insight-note';n.textContent=description;card.append(n)}
- return card;
-}
-function renderVisuals(monthRows){
- const costs=expenseRows(monthRows),income=incomeRows(monthRows);
- const paid=sum(costs,r=>r.status==='pagato');
- const unpaid=sum(costs,r=>r.status==='previsto');
- const incomings=sum(income,()=>true);
- const spent=paid+unpaid;
- const creditPaid=sum(rows,r=>r.category==='Rimborso Angela'&&r.status==='pagato'&&r.direction===(ledger==='azienda'?'uscita':'entrata'));
- const creditPending=Math.max(0,1512-creditPaid);
- $('chartsMonth').textContent=new Date($('month').value+'-02T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});
- drawDonut('pieCategories',pieDataByCategory(monthRows),'spese totali');
- drawDonut('pieStatus',[['Già pagato',paid],['Ancora da pagare',unpaid]],'spese');
- drawDonut('pieFlow',[['Entrate registrate',incomings],['Uscite registrate',spent]],'movimenti');
- if(ledger==='azienda'){
-  $('pieExtraTitle').textContent='Credito Angela';
-  $('pieExtraDesc').textContent='Anticipi personali restituiti e ancora da rimborsare';
-  drawDonut('pieExtra',[['Già rimborsato',Math.min(1512,creditPaid)],['Da restituire',creditPending]],'credito totale');
- }else{
-  $('pieExtraTitle').textContent='Rate e altre uscite';
-  $('pieExtraDesc').textContent='Quanto incidono le rate sulle spese personali';
-  const rate=sum(costs,r=>r.category==='Rate');
-  drawDonut('pieExtra',[['Rate',rate],['Altre spese',Math.max(0,spent-rate)]],'spese totali');
- }
- const due=rows.filter(r=>r.direction==='uscita'&&r.status==='previsto'&&r.category!=='Rimborso Angela').sort((a,b)=>a.entry_date.localeCompare(b.entry_date));
- const now=new Date().toLocaleDateString('en-CA');
- const next=due.find(r=>r.entry_date>=now)||due[0];
- const largest=[...costs].sort((a,b)=>Number(b.amount)-Number(a.amount))[0];
- const category=pieDataByCategory(monthRows)[0];
- const received=sum(income,r=>r.status==='pagato');
- const expected=sum(income,r=>r.status==='previsto');
- const projected=received+expected-paid-unpaid;
- const notes=$('insights');notes.replaceChildren();
- notes.append(
-  insight('Prossima scadenza',next?next.title+' · '+euros(next.amount):'Nessuna scadenza',next?new Date(next.entry_date+'T12:00:00').toLocaleDateString('it-IT')+(next.entry_date<now?' · Scaduta':''):'Non risultano uscite in sospeso'),
-  insight('Spesa più alta del mese',largest?largest.title:'Nessuna',largest?euros(largest.amount):''),
-  insight('Categoria più costosa',category?category[0]:'Nessuna',category?euros(category[1]):''),
-  insight('Proiezione del mese',euros(projected), 'Entrate incassate e previste, meno uscite pagate e previste. Non include crediti senza data certa e non è il saldo bancario')
- );
- if(ledger==='azienda')notes.append(insight('Angela: ancora da rimborsare',euros(creditPending),'Credito registrato separatamente dai costi ordinari'));
- else notes.append(insight('Credito verso Aerial Move',euros(creditPending),'Da incassare solo quando Aerial Move effettua il rimborso'));
- $('appUpdated').textContent='Dati aggiornati: '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+' · ogni nuovo movimento aggiorna automaticamente i grafici.';
-}
-
-async function loadBudgetSettings(){
- const l=ledger,m=$('month').value,t=token;
- try{
-  const {data,error}=await db.rpc('finanze_budget_read',{p_token:t,p_month:m});
-  if(error)throw error;
-  if(t!==token||l!==ledger||m!==$('month').value)return;
-  monthlyBudget={
-   opening_funds:Number(data?.opening_funds??0),
-   reserve_amount:Number(data?.reserve_amount??0),
-   alert_threshold:Number(data?.alert_threshold??100),
-   spending_cap:data?.spending_cap===null||data?.spending_cap===undefined?null:Number(data.spending_cap)
-  };
-  $('budgetOpening').value=monthlyBudget.opening_funds;
-  $('budgetReserve').value=monthlyBudget.reserve_amount;
-  $('budgetThreshold').value=monthlyBudget.alert_threshold;
-  $('budgetCap').value=monthlyBudget.spending_cap===null?'':monthlyBudget.spending_cap;
- }catch(err){say('Budget: impostazioni non caricate. '+err.message)}
-}
-$('budgetForm').onsubmit=async event=>{
- event.preventDefault();
- const vals=['budgetOpening','budgetReserve','budgetThreshold'].map(id=>Number($(id).value));
- const raw=$('budgetCap').value.trim();
- const cap=raw===''?null:Number(raw);
- if(vals.some(x=>!Number.isFinite(x))||vals[1]<0||vals[2]<0||(cap!==null&&(!Number.isFinite(cap)||cap<0))){
-  say('Controlla le cifre nelle impostazioni del budget.');return;
- }
- $('saveBudget').disabled=true;
- try{
-  const {data,error}=await db.rpc('finanze_budget_save',{
-    p_token:token,p_month:$('month').value,p_opening_funds:vals[0],
-    p_reserve_amount:vals[1],p_alert_threshold:vals[2],p_spending_cap:cap
-  });
-  if(error)throw error;
-  monthlyBudget={
-    opening_funds:Number(data.opening_funds),reserve_amount:Number(data.reserve_amount),
-    alert_threshold:Number(data.alert_threshold),
-    spending_cap:data.spending_cap===null?null:Number(data.spending_cap)
-  };
-  render();say('Budget e soglia di avviso salvati.');
- }catch(err){say('Non è stato possibile salvare: '+err.message)}
- finally{$('saveBudget').disabled=false}
-};
-function calculateMonthlyBudget(monthRows,settings){
- const incomes=incomeRows(monthRows),expenses=expenseRows(monthRows);
- const projectedIncome=sum(incomes,()=>true);
- const committed=sum(expenses,()=>true);
- const opening=Number(settings.opening_funds)||0;
- const reserve=Number(settings.reserve_amount)||0;
- const threshold=Number(settings.alert_threshold)||0;
- const cap=settings.spending_cap===null?null:Number(settings.spending_cap);
- const resourceBudget=opening+projectedIncome-reserve;
- const totalBudget=cap===null?resourceBudget:Math.min(resourceBudget,cap);
- const left=totalBudget-committed;
- const state=left<0?'danger':left<=threshold?'warn':'good';
- return {projectedIncome,committed,opening,reserve,threshold,cap,totalBudget,left,state};
-}
-function renderBudget(monthRows){
- const b=calculateMonthlyBudget(monthRows,monthlyBudget);
- $('budgetMonth').textContent=new Date($('month').value+'-02T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});
- $('budgetTotal').textContent=euros(Math.max(0,b.totalBudget));
- $('budgetCommitted').textContent=euros(b.committed);
- $('budgetRemaining').textContent=euros(Math.max(0,b.left));
- $('budgetIncome').textContent=euros(b.projectedIncome);
- const alert=$('budgetAlert');
- alert.className='budget-alert '+b.state;
- alert.replaceChildren();
- const heading=document.createElement('strong'),info=document.createElement('small');
- if(b.state==='danger'){
-  heading.textContent='🔴 Attenzione: scoperto previsto di '+euros(-b.left);
-  info.textContent='Le uscite impegnate e la somma da accantonare superano le risorse stimate. Aggiungi eventuali entrate non registrate oppure rivedi spese e scadenze.';
- }else if(b.state==='warn'){
-  heading.textContent='🟡 Preavviso: rimangono '+euros(b.left);
-  info.textContent='Hai raggiunto la soglia di attenzione impostata ('+euros(b.threshold)+'). Valuta le prossime spese.';
- }else{
-  heading.textContent='🟢 Budget sotto controllo: rimangono '+euros(b.left);
-  info.textContent='Disponibilità stimata dopo le spese già pagate, quelle previste e le somme accantonate.';
- }
- alert.append(heading,info);
- $('budgetFormula').textContent='Calcolo: '+euros(b.opening)+' fondi a inizio mese + '+euros(b.projectedIncome)+
- ' entrate (anche previste) − '+euros(b.reserve)+' da accantonare'+
- (b.cap!==null?' · massimo spese '+euros(b.cap):'')+
- ' − '+euros(b.committed)+' di spese pagate e previste. I rimborsi Angela ancora da ricevere/pagare sono mostrati a parte.';
-}
-
-const creditAdvances=[
- {title:'Anticipo per istruttrici',amount:600},
- {title:'Statuto',amount:200},
- {title:'Workshop',amount:388},
- {title:'Fatture',amount:174},
- {title:'Bungee',amount:150}
-];
-const creditTotalAmount=creditAdvances.reduce((total,item)=>total+item.amount,0);
-function creditedReimbursements(){
- return rows.filter(item=>item.category==='Rimborso Angela'
-  && item.status==='pagato'
-  && item.direction===(ledger==='azienda'?'uscita':'entrata'));
-}
-function renderCreditPanel(){
- const isPersonal=ledger==='personale';
- const paidItems=creditedReimbursements();
- const paid=sum(paidItems,()=>true);
- const remaining=Math.max(0,creditTotalAmount-paid);
- $('creditHeading').textContent=isPersonal?'Soldi che Aerial Move deve ad Angela':'Debito Aerial Move verso Angela';
- $('creditIntro').textContent=isPersonal
-  ? 'Questi sono i soldi personali anticipati per Aerial Move. Sono un credito da recuperare, non denaro già incassato.'
-  : 'Anticipi sostenuti da Angela per Aerial Move. Il totale è un debito da restituire, non una nuova spesa duplicata.';
- $('creditPaidLabel').textContent=isPersonal?'Già ricevuto':'Già restituito';
- $('creditRemainingLabel').textContent=isPersonal?'Ancora da ricevere':'Ancora da restituire';
- $('creditTotal').textContent=euros(creditTotalAmount);
- $('creditPaid').textContent=euros(paid);
- $('creditDue').textContent=euros(remaining);
- const percent=Math.min(100,paid/creditTotalAmount*100);
- $('creditProgress').style.width=percent.toFixed(1)+'%';
- $('creditProgressCaption').textContent=percent.toLocaleString('it-IT',{maximumFractionDigits:1})+'% rimborsato';
- const breakdown=$('creditBreakdown');breakdown.replaceChildren();
- for(const advance of creditAdvances){
-  const line=document.createElement('div');line.className='credit-breakdown-line';
-  const title=document.createElement('span');title.className='credit-name';title.textContent=advance.title;
-  const amount=document.createElement('span');amount.className='credit-amount';amount.textContent=euros(advance.amount);
-  line.append(title,amount);breakdown.append(line);
- }
- const history=$('creditHistory');history.replaceChildren();
- $('creditHistoryHeading').textContent=isPersonal?'Rimborsi già ricevuti':'Rimborsi già versati';
- if(!paidItems.length){
-  const placeholder=document.createElement('p');placeholder.className='muted';
-  placeholder.textContent='Nessun rimborso segnato come effettuato in questa sezione.';
-  history.append(placeholder);
- }else{
-  for(const payment of [...paidItems].sort((a,b)=>b.entry_date.localeCompare(a.entry_date))){
-   const line=document.createElement('div');line.className='credit-history-line';
-   const info=document.createElement('div');
-   const title=document.createElement('div');title.className='credit-name';title.textContent=payment.title;
-   const date=document.createElement('div');date.className='credit-detail';
-   date.textContent=new Date(payment.entry_date+'T12:00:00').toLocaleDateString('it-IT');
-   info.append(title,date);
-   const amount=document.createElement('span');amount.className='credit-amount';amount.textContent=euros(payment.amount);
-   line.append(info,amount);history.append(line);
+const $=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const d=new Date(),current=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+$('month').value=current;$('newStart').value=current;
+let ledger='azienda',token='',templates=[],rows=[],busy=false;
+const key=s=>'am_finanze_v2_'+s;
+function msg(t){$('message').textContent=t;$('message').style.display='block';setTimeout(()=>$('message').style.display='none',5500)}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function findMonth(t){return rows.filter(r=>r.entry_date.slice(0,7)===$('month').value&&r.direction===t.direction&&(r.recurring_id===t.id||(!r.recurring_id&&r.title.trim().toLowerCase()===t.title.trim().toLowerCase()))).sort((a,b)=>Number(b.status==='pagato')-Number(a.status==='pagato'))[0]||null}
+function applicable(t){const m=$('month').value;return t.active&&t.start_month.slice(0,7)<=m&&(!t.end_month||t.end_month.slice(0,7)>=m)}
+async function openSection(s,t){ledger=s;token=t;localStorage.setItem('am_finanze_preferred',s);$('login').classList.add('hide');$('main').classList.remove('hide');$('company').className=s==='azienda'?'active':'';$('personal').className=s==='personale'?'active':'';await load()}
+async function signIn(){const s=$('loginSection').value,p=$('password').value;if(p.length<8){msg('Inserisci la password.');return}$('enter').disabled=true;try{const {data,error}=await db.rpc('finanze_login_direct',{p_ledger:s,p_password:p});if(error)throw error;if(!data){msg('Password non riconosciuta o accesso temporaneamente bloccato.');return}localStorage.setItem(key(s),data);$('password').value='';await openSection(s,data)}catch(e){msg('Accesso non riuscito: '+e.message)}finally{$('enter').disabled=false}}
+$('enter').onclick=signIn;$('password').onkeydown=e=>{if(e.key==='Enter')signIn()};
+async function switchTo(s){let t=localStorage.getItem(key(s))||sessionStorage.getItem(key(s));if(t)await openSection(s,t);else{ledger=s;token='';$('loginSection').value=s;$('main').classList.add('hide');$('login').classList.remove('hide');$('password').focus()}}
+$('company').onclick=()=>switchTo('azienda');$('personal').onclick=()=>switchTo('personale');$('logout').onclick=async()=>{try{await db.rpc('finanze_direct_logout',{p_token:token})}catch{}localStorage.removeItem(key(ledger));sessionStorage.removeItem(key(ledger));await switchTo(ledger)};
+async function load(){if(!token)return;busy=true;try{const [a,b]=await Promise.all([db.rpc('finanze_recurring_list',{p_token:token}),db.rpc('finanze_direct_read',{p_token:token})]);if(a.error)throw a.error;if(b.error)throw b.error;templates=a.data||[];rows=b.data||[];render()}catch(e){msg('Accesso non valido o errore: '+e.message);if(/scaduta|invalid|session/i.test(e.message)){localStorage.removeItem(key(ledger));sessionStorage.removeItem(key(ledger));await switchTo(ledger)}}finally{busy=false}}
+$('reload').onclick=load;$('month').onchange=render;
+async function ensureMonth(){const {error}=await db.rpc('finanze_recurring_prepare_month',{p_token:token,p_month:$('month').value});if(error)throw error;await load()}
+$('prepare').onclick=async()=>{try{await ensureMonth();msg('Scadenze mancanti create senza duplicare quelle presenti.')}catch(e){msg('Impossibile creare: '+e.message)}};
+function structureTwin(t,r){return r&&r.status==='previsto'&&t.title.toLowerCase().includes('struttura')&&rows.some(x=>x.id!==r.id&&x.status==='pagato'&&x.entry_date.slice(0,7)===$('month').value&&x.title.toLowerCase().includes('struttura')&&Number(x.amount)===Number(r.amount))}
+function render(){if(!token)return;$('company').className=ledger==='azienda'?'active':'';$('personal').className=ledger==='personale'?'active':'';
+ const list=$('items');list.replaceChildren();let paid=0,due=0;
+ const items=[...templates].filter(applicable).sort((a,b)=>a.direction.localeCompare(b.direction)||a.title.localeCompare(b.title));
+ for(const t of items){
+  const r=findMonth(t),amt=Number(r?.amount??t.amount),warn=structureTwin(t,r);
+  if(t.direction==='uscita'){if(r?.status==='pagato')paid+=amt;else due+=amt}
+  const card=el('div','item'),head=el('div','row');head.append(el('span','name',t.title),el('span','money',money(amt)));card.append(head);
+  card.append(el('div','muted',(t.direction==='entrata'?'Entrata':'Spesa')+' · ogni mese, giorno '+t.day_of_month));
+  card.append(el('span','state'+(r?.status==='pagato'?' ok':''),r?.status==='pagato'?(t.direction==='entrata'?'Incassato':'Pagato'):(r?'Da pagare':'Da registrare')));
+  if(warn)card.append(el('div','warning','Attenzione: è presente una quota struttura di pari importo già pagata. Controlla prima di registrare un secondo pagamento.'));
+  const actions=el('div','actions');
+  const edit=el('button','soft','✏️ Modifica €');edit.onclick=()=>editAmount(t,r,card);actions.append(edit);
+  if(!warn){
+   const pay=el('button','',r?.status==='pagato'?'↩ Annulla pagato':(t.direction==='entrata'?'✓ Incassato':'✓ Segna pagato'));
+   pay.onclick=()=>togglePaid(t,r);actions.append(pay);
   }
+  card.append(actions);list.append(card);
  }
- $('recordCreditPayment').textContent=isPersonal?'+ Registra rimborso ricevuto':'+ Registra rimborso versato';
- $('creditFootnote').textContent=isPersonal
-  ? 'Registra solo i soldi realmente ricevuti. La riga iniziale del credito da 1.512 € va lasciata prevista: non segnarla come incassata insieme ai rimborsi parziali.'
-  : 'Segna soltanto i rimborsi realmente versati e registra il movimento corrispondente anche nella sezione Personale Angela.';
+ if(!items.length)list.append(el('p','muted','Non ci sono quote fisse attive per questo mese. Premi “+ Nuova quota” oppure cambia il mese.'));
+ $('paid').textContent=money(paid);$('due').textContent=money(due);
 }
-$('recordCreditPayment').onclick=()=>{
- const paid=sum(creditedReimbursements(),()=>true);
- const remaining=Math.max(0,creditTotalAmount-paid);
- if(remaining<=0){say('Il credito risulta già rimborsato completamente.');return}
- reset();
- $('date').value=today;
- $('direction').value=ledger==='personale'?'entrata':'uscita';
- $('status').value='pagato';
- $('category').value='Rimborso Angela';
- $('title').value=ledger==='personale'?'Rimborso ricevuto da Aerial Move':'Rimborso versato ad Angela';
- $('notes').value='Rimborso degli anticipi di Angela per Aerial Move; residuo prima di questo rimborso: '+euros(remaining);
- $('amount').value='';
- $('formTitle').textContent=ledger==='personale'?'Registra rimborso ricevuto':'Registra rimborso versato';
- $('form').scrollIntoView({behavior:'smooth'});
- $('amount').focus();
+async function togglePaid(t,r){
+ const next=r?.status==='pagato'?'previsto':'pagato';
+ if(!confirm('Confermi '+t.title+' · '+(next==='pagato'?'pagato':'non pagato')+'?'))return;
+ try{
+  if(!r){await ensureMonth();r=findMonth(t)}
+  if(!r)throw Error('Scadenza non trovata');
+  const item={id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,notes:r.notes||'',amount:Number(r.amount),direction:r.direction,status:next};
+  const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:item});if(error)throw error;await load();msg('Pagamento aggiornato.');
+ }catch(e){msg('Non riuscito: '+e.message)}
+}
+function editAmount(t,r,card){
+ document.querySelectorAll('.edit').forEach(x=>x.remove());
+ const panel=el('div','edit');const title=el('label','', 'Nuovo importo per '+t.title);const input=el('input');input.type='number';input.min='.01';input.step='.01';input.value=r?.amount??t.amount;input.setAttribute('aria-label','Nuovo importo');
+ const label=el('label','','Applica la modifica');const choice=el('select');
+ for(const [val,name] of [['single','Solo questo mese'],['future','Da questo mese e per i prossimi (non quelli pagati)']]){const op=el('option','',name);op.value=val;choice.append(op)}
+ const actions=el('div','actions');actions.style.marginTop='12px';
+ const save=el('button','','Salva importo');const cancel=el('button','soft','Annulla');cancel.onclick=()=>panel.remove();save.onclick=()=>saveAmount(t,r,input.value,choice.value,save);
+ actions.append(save,cancel);panel.append(title,input,label,choice,actions);card.append(panel);input.focus();
+}
+async function saveAmount(t,r,raw,mode,button){
+ const value=Number(String(raw).replace(',','.'));if(!Number.isFinite(value)||value<=0){msg('Inserisci un importo maggiore di zero');return}button.disabled=true;
+ try{
+  if(mode==='future'){
+   const item={id:t.id,title:t.title,category:t.category,amount:value,direction:t.direction,day_of_month:t.day_of_month,start_month:t.start_month,end_month:t.end_month,active:t.active};
+   const {error}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:item,p_apply_future:true,p_from_month:$('month').value});
+   if(error)throw error;
+   if(!r){await ensureMonth()}
+   msg('Quota aggiornata per i mesi futuri non ancora pagati.');
+  }else{
+   if(!r){await ensureMonth();r=findMonth(t)}
+   if(!r)throw Error('Non riesco a trovare la rata del mese');
+   const item={id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,notes:r.notes||'',amount:value,direction:r.direction,status:r.status};
+   const {error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:item});if(error)throw error;
+   msg('Importo di questo mese aggiornato.');
+  }
+  await load();
+ }catch(e){msg('Non salvato: '+e.message)}finally{button.disabled=false}
+}
+$('new').onclick=()=>{$('newPanel').classList.remove('hide');$('newStart').value=$('month').value;$('newPanel').scrollIntoView({behavior:'smooth'})};
+$('newCancel').onclick=()=>$('newPanel').classList.add('hide');
+$('newForm').onsubmit=async e=>{
+ e.preventDefault();const r={title:$('newName').value.trim(),amount:Number($('newAmount').value),day_of_month:Number($('newDay').value),category:$('newCategory').value,direction:$('newDirection').value,start_month:$('newStart').value+'-01',end_month:$('newEnd').value?$('newEnd').value+'-01':null,active:true};
+ if(r.end_month&&r.end_month<r.start_month){msg('Il mese finale deve essere successivo a quello iniziale');return}
+ $('newSave').disabled=true;
+ try{const {error}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:r,p_apply_future:false,p_from_month:null});if(error)throw error;$('newPanel').classList.add('hide');$('newForm').reset();await ensureMonth();msg('Nuova quota mensile salvata.')}catch(err){msg('Non salvato: '+err.message)}finally{$('newSave').disabled=false}
 };
-
-function edit(r){$('editId').value=r.id;$('date').value=r.entry_date;$('amount').value=r.amount;$('title').value=r.title;$('category').value=r.category;$('notes').value=r.notes||'';$('direction').value=r.direction;$('status').value=r.status;$('formTitle').textContent='Modifica movimento';$('form').scrollIntoView({behavior:'smooth'})}
-function reset(){$('form').reset();$('editId').value='';$('date').value=today;$('formTitle').textContent='Nuovo movimento'}$('cancel').onclick=reset;
-$('form').onsubmit=async ev=>{ev.preventDefault();const rec={id:$('editId').value||null,entry_date:$('date').value,title:$('title').value.trim(),category:$('category').value,notes:$('notes').value,amount:Number($('amount').value),direction:$('direction').value,status:$('status').value};if(!rec.title||!(rec.amount>0)){say('Inserisci descrizione e importo valido');return}try{$('save').disabled=true;const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:rec});if(error)throw error;reset();await load();say('Movimento salvato')}catch(e){say(e.message)}finally{$('save').disabled=false}};
-async function remove(r){if(!confirm('Eliminare il movimento "'+r.title+'"?'))return;const{error}=await db.rpc('finanze_direct_delete',{p_token:token,p_id:r.id});if(error)say(error.message);else{say('Movimento eliminato');await load()}}
-$('export').onclick=()=>{const cols=['entry_date','title','category','direction','status','amount','notes'];const csv=[cols.join(';'),...rows.map(r=>cols.map(k=>'"'+String(r[k]??'').replaceAll('"','""')+'"').join(';'))].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='aerial-finanze-'+ledger+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-$('seed').onclick=async()=>{if(rows.length){say('Hai già movimenti: non carico dati doppi.');return}if(!confirm('Importare il piano iniziale come movimenti previsti?'))return;const rec=[];const add=(date,title,amount,direction='uscita',category='Altro',notes='')=>rec.push({entry_date:date,title,amount,direction,category,notes,status:'previsto'});
-if(ledger==='azienda'){for(let i=0;i<4;i++){const date=new Date(2026,9+i,5).toLocaleDateString('en-CA');[['Affitto sede',500,'Affitto'],['Hip Hop',800,'Collaboratori'],['Acrobatica',500,'Collaboratori'],['Martina',400,'Collaboratori'],['Italia',400,'Collaboratori']].forEach(x=>add(date,x[0],x[1],'uscita',x[2]));if(i<3)add(date,'Rata struttura',700,'uscita','Rate');if(i===1)add('2026-11-15','IVA novembre',350,'uscita','Fornitori');if(i===2)add('2026-12-15','Bidello',150,'uscita','Altro')}add('2027-01-31','Restituzione Orlando',800,'uscita','Rate','Data di fine gennaio; modificare se concordata una data diversa')}
-else{for(let i=0;i<12;i++)add(new Date(2026,9+i,17).toLocaleDateString('en-CA'),'Entrata mensile',1500,'entrata','Stipendio');add('2026-10-18','Mercatorum arretrati',900,'uscita','Rate','Tre rate scadute di luglio-agosto-settembre; proposta di rientro da concordare');add('2026-10-18','Mercatorum rata ottobre',300,'uscita','Rate');add('2026-10-31','PayPal totale residuo',698,'uscita','Rate','Scadenza da confermare');add('2026-10-31','Klarna totale residuo',163,'uscita','Rate','Scadenza da confermare')}
-let ok=0;for(const r of rec){const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:r});if(error){say('Interrotto: '+error.message);break}ok++}say('Inseriti '+ok+' movimenti previsti');await load()};
-(async()=>{
- const recoveryLink=new URLSearchParams(location.hash.slice(1)).get('type')==='recovery'||new URLSearchParams(location.search).get('type')==='recovery';
- ledger=recoveryLink?'azienda':(localStorage.getItem('am_finanze_preferred')||'azienda');
- $('loginLedger').value=ledger;
- const t=localStorage.getItem(savedKey(ledger))||sessionStorage.getItem(savedKey(ledger));
- if(t&&!recoveryLink)await openSection(t,ledger);else loginView();
- if(recoveryLink){
-  $('recoverCompanyPanel').classList.remove('hide');
-  if(await updateCompanyRecoveryState())companyRecoveryNotice('Email verificata. Imposta una nuova password Aerial Move.');
- }
-})();
-$('loginLedger').onchange=()=>{ledger=$('loginLedger').value;localStorage.setItem('am_finanze_preferred',ledger);refreshSetup()};
+(async()=>{const chosen=localStorage.getItem('am_finanze_preferred')||'azienda',saved=localStorage.getItem(key(chosen))||sessionStorage.getItem(key(chosen));$('loginSection').value=chosen;if(saved)await openSection(chosen,saved)})();
 </script></body></html>
