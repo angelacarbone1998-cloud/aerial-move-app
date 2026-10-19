@@ -1,0 +1,118 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#74215e"><title>Pagamenti fissi · Aerial Move Finanze</title><style>
+*{box-sizing:border-box}body{margin:0;background:#faf5f9;color:#302334;font:15px system-ui,-apple-system,sans-serif}header{background:#74215e;color:white;padding:22px 16px}h1{margin:0;font-size:23px}.wrap{max-width:820px;margin:auto;padding:15px 15px 70px}.card{background:white;border:1px solid #eadde7;border-radius:18px;padding:16px;margin:13px 0;box-shadow:0 2px 10px #4b164f0a}.muted{font-size:13px;color:#776b78;line-height:1.5}.row{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}a{color:#70215c;text-decoration:none;font-weight:650}header a{color:white}h2{font-size:21px;margin:0 0 7px}h3{font-size:17px;margin:0 0 10px}button{background:#74215e;color:white;border:0;border-radius:11px;padding:11px 14px;font-size:14px;font-weight:650;cursor:pointer}button.alt{background:#f1e5ef;color:#74215e}button:disabled{opacity:.5}input,select{font:inherit;border:1px solid #d8c7d6;border-radius:10px;padding:12px;background:white;width:100%;min-width:0}label{display:block;margin:10px 0 5px;font-size:13px;font-weight:650}.hide{display:none!important}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{border-radius:14px;background:#f8edf5;padding:13px}.metric span{font-size:12px;color:#715b70}.metric strong{display:block;margin-top:5px;font-size:19px}.entry{padding:14px 0;border-top:1px solid #ebdfe8}.entry:first-child{border-top:0}.entry h3{margin:0;font-size:16px}.amount{font-weight:750;font-size:17px;white-space:nowrap}.entry-sub{font-size:12px;color:#807080;margin:4px 0 9px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.actions button{padding:9px 11px;font-size:13px}.status{display:inline-block;border-radius:50px;background:#fff1d7;color:#7d531d;padding:4px 9px;font-size:12px;font-weight:700}.status.paid{background:#e4f5ea;color:#19683c}.status.off{background:#ece5eb;color:#786979}.alert{background:#fff3db;color:#86521a;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5;margin:9px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.check{display:flex;gap:9px;font-weight:450;line-height:1.4}.check input{width:auto;align-self:flex-start;margin-top:3px}.notice{background:#f1e7ef;padding:12px;border-radius:11px;font-size:13px;margin:12px 0}#toast{position:fixed;bottom:16px;left:15px;right:15px;max-width:790px;margin:auto;background:#322438;color:#fff;padding:14px;border-radius:12px;display:none;z-index:5}@media(max-width:370px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><div class="row"><div><h1>Pagamenti fissi mensili</h1><div style="opacity:.85;font-size:13px">Aerial Move Finanze</div></div><a href="./">← Riepilogo</a></div></header>
+<main class="wrap"><div class="card"><div class="row"><div><h2 id="heading">Aerial Move</h2><p class="muted" style="margin:0">Modifica importi, controlla le rate e segna quello che hai pagato.</p></div><button id="switchSection" class="alt">Cambia sezione</button></div>
+<label for="month">Mese da aggiornare</label><input type="month" id="month"></div>
+<div id="error" class="card hide"><h3>Accedi prima all'app</h3><p class="muted">Per proteggere i dati, apri la sezione dalla pagina principale ed effettua l'accesso con la sua password.</p><a href="./">Apri accesso Aerial Move Finanze →</a></div>
+<div id="app" class="hide">
+<div class="card"><div class="metrics"><div class="metric"><span>Da pagare questo mese</span><strong id="due">0 €</strong></div><div class="metric"><span>Già pagato</span><strong id="paid">0 €</strong></div></div>
+<p class="muted" style="margin-bottom:0">Le cifre qui sopra riguardano i soli pagamenti fissi della sezione selezionata.</p></div>
+<div class="card"><div class="row"><h3>Le tue scadenze fisse</h3><button id="add" class="alt">+ Aggiungi</button></div>
+<div class="row"><button id="prepare">Prepara le scadenze del mese</button><button id="reload" class="alt">↻ Aggiorna</button></div>
+<p class="muted">Prepara il mese una sola volta: se una scadenza è già presente non viene duplicata.</p>
+<div id="items"></div>
+</div>
+<div id="editor" class="card hide"><h3 id="formTitle">Modifica pagamento fisso</h3><form id="form"><input type="hidden" id="recId"><label>Nome</label><input id="title" required maxlength="130" placeholder="Es. Affitto sede"><div class="grid">
+<div><label>Importo €</label><input id="amount" type="number" min=".01" step=".01" required></div>
+<div><label>Giorno del mese (1–28)</label><input id="day" type="number" min="1" max="28" required></div>
+<div><label>Tipo</label><select id="direction"><option value="uscita">Spesa fissa</option><option value="entrata">Entrata fissa</option></select></div>
+<div><label>Categoria</label><select id="category"><option>Affitto</option><option>Collaboratori</option><option>Rate</option><option>Utenze</option><option>Fornitori</option><option>Stipendio</option><option>Altro</option></select></div>
+<div><label>Inizio</label><input type="month" id="start" required></div>
+<div><label>Fine (opzionale)</label><input type="month" id="end"></div></div>
+<label class="check"><input type="checkbox" id="active" checked>Pagamento fisso attivo</label>
+<label class="check"><input type="checkbox" id="future" checked>Aggiorna anche i mesi futuri ancora da pagare; non modificare quelli già pagati</label>
+<div class="row" style="margin-top:15px"><button type="submit" id="save">Salva</button><button type="button" class="alt" id="cancel">Annulla</button></div></form>
+<p class="muted">Per cambiare solo questo mese, usa “Solo questa rata”. Le modifiche ai fissi non alterano le rate già pagate.</p></div>
+</div></main><div id="toast" role="status"></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+const db=createClient('https://ztskaqyudcamdailxdef.supabase.co','sb_publishable_EohjiHILTe57ttNQHtXw8A_Tdz_-Rvr');
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const now=new Date(),localToday=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+$('month').value=localToday.slice(0,7);
+let section=new URLSearchParams(location.search).get('sezione')==='personale'?'personale':'azienda';
+let token='',templates=[],rows=[],busy=false;
+const key=ledger=>'am_finanze_v2_'+ledger;
+function notice(msg){$('toast').textContent=msg;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',5500)}
+function error(err){notice(err?.message||String(err))}
+function monthRow(t){return rows.filter(r=>r.entry_date.slice(0,7)===$('month').value&&r.direction===t.direction&&(r.recurring_id===t.id||(!r.recurring_id&&r.title.trim().toLowerCase()===t.title.trim().toLowerCase()))).sort((a,b)=>Number(b.status==='pagato')-Number(a.status==='pagato'))[0]}
+function activeInMonth(t){const month=$('month').value;return t.active&&t.start_month.slice(0,7)<=month&&(!t.end_month||t.end_month.slice(0,7)>=month)}
+function mk(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt;return n}
+async function load(){
+ if(!token){$('app').classList.add('hide');$('error').classList.remove('hide');return}
+ try{
+ const [a,b]=await Promise.all([db.rpc('finanze_recurring_list',{p_token:token}),db.rpc('finanze_direct_read',{p_token:token})]);
+ if(a.error)throw a.error;if(b.error)throw b.error;
+ templates=a.data||[];rows=b.data||[];$('error').classList.add('hide');$('app').classList.remove('hide');render();
+ }catch(e){$('app').classList.add('hide');$('error').classList.remove('hide');error(e)}
+}
+function twinWarning(t,r){return r&&r.status==='previsto'&&t.ledger==='azienda'&&t.title.toLowerCase().includes('struttura')&&rows.some(x=>x.id!==r.id&&x.status==='pagato'&&x.entry_date.slice(0,7)===$('month').value&&x.title.toLowerCase().includes('struttura')&&Number(x.amount)===Number(r.amount))}
+function render(){
+ $('heading').textContent=section==='azienda'?'Aerial Move':'Personale Angela';
+ const list=$('items');list.replaceChildren();
+ let paid=0,due=0;
+ const sorted=[...templates].sort((a,b)=>Number(!a.active)-Number(!b.active)||a.title.localeCompare(b.title));
+ for(const t of sorted){
+  const eligible=activeInMonth(t),r=eligible?monthRow(t):null;
+  if(eligible&&t.direction==='uscita'){if(r?.status==='pagato')paid+=Number(r.amount);else due+=Number(r?.amount??t.amount)}
+  const box=mk('div','entry','');const top=mk('div','row','');
+  top.append(mk('h3','',t.title),mk('span','amount',fmt(r?.amount??t.amount)));box.append(top);
+  box.append(mk('div','entry-sub',(t.direction==='entrata'?'Entrata':'Spesa')+' · giorno '+t.day_of_month+' · '+t.category+(t.end_month?' · termina '+t.end_month.slice(0,7):'')));
+  const status=!eligible?'Non attivo nel mese':r?.status==='pagato'?(t.direction==='entrata'?'Incassato':'Pagato'):r?'Da pagare':'Scadenza non creata';
+  box.append(mk('span','status'+(r?.status==='pagato'?' paid':!eligible?' off':''),status));
+  const duplicate=twinWarning(t,r);
+  if(duplicate)box.append(mk('p','alert','Da verificare: in questo mese c’è già una quota struttura dello stesso importo segnata pagata. Controlla prima di segnare anche questa.'));
+  const actions=mk('div','actions','');
+  const edit=mk('button','alt','Modifica fisso');edit.onclick=()=>openEditor(t);actions.append(edit);
+  if(eligible){
+   if(r){
+    if(r.status==='previsto'&&!duplicate){
+     const btn=mk('button','',t.direction==='entrata'?'✓ Incassato':'✓ Segna pagato');btn.onclick=()=>markPaid(t,r);actions.append(btn)
+    }
+    const one=mk('button','alt','Solo questa rata');one.onclick=()=>singleMonth(r);actions.append(one);
+   }else{
+    const add=mk('button','alt','Crea scadenza');add.onclick=prepare;actions.append(add)
+   }
+  }
+  box.append(actions);list.append(box);
+ }
+ if(!templates.length)list.append(mk('p','muted','Nessuna voce fissa ancora impostata. Premi “+ Aggiungi”.'));
+ $('paid').textContent=fmt(paid);$('due').textContent=fmt(due);
+}
+async function markPaid(t,r){
+ if(!confirm('Confermi '+t.title+' '+fmt(r.amount)+' '+(t.direction==='entrata'?'incassati':'pagati')+'?'))return;
+ const record={id:r.id,entry_date:r.entry_date,title:r.title,category:r.category,notes:r.notes||'',amount:Number(r.amount),direction:r.direction,status:'pagato'};
+ const result=await db.rpc('finanze_direct_write',{p_token:token,p_record:record});
+ if(result.error){error(result.error);return}await load();notice(t.title+' aggiornato.')
+}
+async function prepare(){
+ if(busy)return;busy=true;$('prepare').disabled=true;
+ try{const {data,error:err}=await db.rpc('finanze_recurring_prepare_month',{p_token:token,p_month:$('month').value});if(err)throw err;await load();notice(data?'Create '+data+' scadenze senza duplicati.':'Scadenze già presenti: nessun duplicato creato.')}catch(e){error(e)}finally{busy=false;$('prepare').disabled=false}
+}
+$('prepare').onclick=prepare;$('reload').onclick=load;
+function openEditor(t){
+ $('form').reset();$('recId').value=t?.id||'';$('title').value=t?.title||'';$('amount').value=t?.amount??'';
+ $('day').value=t?.day_of_month??5;$('direction').value=t?.direction||'uscita';$('category').value=t?.category||'Altro';
+ $('start').value=t?.start_month?.slice(0,7)||$('month').value;$('end').value=t?.end_month?.slice(0,7)||'';
+ $('active').checked=t?.active??true;$('future').checked=true;
+ $('formTitle').textContent=t?'Modifica '+t.title:'Aggiungi un pagamento fisso';
+ $('editor').classList.remove('hide');$('editor').scrollIntoView({behavior:'smooth'})
+}
+$('add').onclick=()=>openEditor(null);$('cancel').onclick=()=>$('editor').classList.add('hide');
+$('form').onsubmit=async e=>{
+ e.preventDefault();
+ const t={id:$('recId').value||null,title:$('title').value.trim(),amount:Number($('amount').value),day_of_month:Number($('day').value),direction:$('direction').value,category:$('category').value,start_month:$('start').value+'-01',end_month:$('end').value?$('end').value+'-01':null,active:$('active').checked};
+ if(t.end_month&&t.end_month<t.start_month){notice('La data di fine precede l’inizio.');return}
+ $('save').disabled=true;
+ try{const {error:err}=await db.rpc('finanze_recurring_save',{p_token:token,p_record:t,p_apply_future:!!(t.id&&$('future').checked),p_from_month:$('month').value});if(err)throw err;$('editor').classList.add('hide');await load();notice('Pagamento fisso salvato. Le rate già pagate restano invariate.')}catch(err){error(err)}finally{$('save').disabled=false}
+};
+function singleMonth(r){
+ const args=new URLSearchParams({sezione:section,solo:r.id});
+ location.href='./?'+args.toString()
+}
+$('month').onchange=render;
+$('switchSection').onclick=()=>{section=section==='azienda'?'personale':'azienda';token=localStorage.getItem(key(section))||sessionStorage.getItem(key(section))||'';load()};
+token=localStorage.getItem(key(section))||sessionStorage.getItem(key(section))||'';load();
+</script></body></html>
