@@ -80,6 +80,30 @@
 </div>
 <button type="button" class="alt" id="showPersonalSetup" style="margin-top:10px">Attiva per la prima volta Personale Angela</button>
 <button type="button" class="alt" id="forgotPersonal" style="margin-top:10px">Password dimenticata? Personale Angela</button>
+<button type="button" class="alt" id="forgotCompany" style="margin-top:10px">Password dimenticata? Aerial Move</button>
+<div id="recoverCompanyPanel" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
+<h3>Recupera password Aerial Move</h3>
+<p class="muted">Per proteggere i dati finanziari occorre verificare l'email autorizzata. Non ti verranno richieste le vecchie password.</p>
+<button type="button" class="full" id="sendCompanyRecovery">Invia email per reimpostare la password</button>
+<p class="muted">L'email può impiegare qualche minuto. Se l'invio è temporaneamente bloccato, non richiederlo ripetutamente.</p>
+<details style="margin-top:12px">
+ <summary style="font-size:13px;color:#70235b;font-weight:650;cursor:pointer">Il link apre una pagina sbagliata?</summary>
+ <p class="muted">Dalla mail copia il collegamento di recupero senza aprirlo e incollalo qui. Non condividerlo con nessuno.</p>
+ <label for="companyRecoveryLink">Collegamento ricevuto via email</label>
+ <input id="companyRecoveryLink" type="password" autocomplete="off" placeholder="Incolla il link di recupero">
+ <button type="button" class="alt" id="verifyCompanyRecoveryLink" style="margin-top:9px">Verifica il link qui</button>
+</details>
+<div id="companyRecoveryNewPanel" class="hide" style="margin-top:16px;border-top:1px solid #e0cfdd;padding-top:10px">
+ <h4 style="margin:0 0 10px">Imposta la nuova password Aerial Move</h4>
+ <label for="companyNewPassword">Nuova password (almeno 10 caratteri)</label>
+ <input id="companyNewPassword" type="password" minlength="10" autocomplete="new-password">
+ <label for="companyNewConfirm">Ripeti la nuova password</label>
+ <input id="companyNewConfirm" type="password" minlength="10" autocomplete="new-password">
+ <button type="button" class="full" id="saveRecoveredCompany" style="margin-top:12px">Reimposta la password Aerial Move</button>
+</div>
+<p class="notice hide" id="companyRecoveryMessage" role="status"></p>
+<button type="button" class="alt" id="cancelCompanyRecovery" style="margin-top:12px">Torna all'accesso</button>
+</div>
 <div id="recoverPersonalPanel" class="hide" style="margin-top:16px;padding:15px;border:1px solid #e9d7e5;border-radius:14px;background:#fcf8fb">
 <h3>Reimposta password Personale Angela</h3>
 <p class="muted">Per proteggere i dati, conferma la password aziendale Aerial Move e scegli una nuova password personale. Nessuna email necessaria.</p>
@@ -184,7 +208,9 @@ function refreshSetup(){
 const personal=$('loginLedger').value==='personale';
 $('showPersonalSetup').classList.toggle('hide',!personal);
 $('forgotPersonal').classList.toggle('hide',!personal);
+$('forgotCompany').classList.toggle('hide',personal);
 if(!personal){$('personalFirstSetup').classList.add('hide');$('recoverPersonalPanel').classList.add('hide')}
+if(personal)$('recoverCompanyPanel').classList.add('hide');
 }
 $('showPersonalSetup').onclick=()=>{$('recoverPersonalPanel').classList.add('hide');$('personalFirstSetup').classList.toggle('hide');$('activationError').classList.add('hide')};
 $('forgotPersonal').onclick=()=>{
@@ -192,6 +218,96 @@ $('personalFirstSetup').classList.add('hide');
 $('recoverPersonalPanel').classList.toggle('hide');
 $('recoverPersonalError').classList.add('hide');
 };
+
+const approvedRecoveryEmail='angelacarbone1998@gmail.com';
+function companyRecoveryNotice(message){
+ $('companyRecoveryMessage').textContent=message;
+ $('companyRecoveryMessage').classList.remove('hide');
+}
+async function verifiedRecoveryIdentity(){
+ const {data,error}=await db.auth.getUser();
+ return !error&&data?.user?.email?.toLowerCase()===approvedRecoveryEmail;
+}
+async function updateCompanyRecoveryState(){
+ const verified=await verifiedRecoveryIdentity();
+ $('companyRecoveryNewPanel').classList.toggle('hide',!verified);
+ return verified;
+}
+$('forgotCompany').onclick=async()=>{
+ $('recoverCompanyPanel').classList.toggle('hide');
+ $('personalFirstSetup').classList.add('hide');
+ $('recoverPersonalPanel').classList.add('hide');
+ $('companyRecoveryMessage').classList.add('hide');
+ if(!$('recoverCompanyPanel').classList.contains('hide'))await updateCompanyRecoveryState();
+};
+$('cancelCompanyRecovery').onclick=()=>{
+ $('recoverCompanyPanel').classList.add('hide');
+ $('companyRecoveryLink').value='';
+ $('companyNewPassword').value='';
+ $('companyNewConfirm').value='';
+};
+$('sendCompanyRecovery').onclick=async()=>{
+ $('sendCompanyRecovery').disabled=true;
+ try{
+  const target=new URL(location.pathname,location.origin).href;
+  const {error}=await db.auth.resetPasswordForEmail(approvedRecoveryEmail,{redirectTo:target});
+  if(error)throw error;
+  companyRecoveryNotice('Richiesta inviata. Apri la mail di recupero e segui il link. Se l’app apre la pagina sbagliata, usa il campo “Collegamento ricevuto” qui sopra.');
+ }catch(err){
+  const limited=/rate limit|too many|429/i.test(err?.message||'');
+  companyRecoveryNotice(limited?'Troppi invii: attendi che termini il blocco prima di richiedere un altro link.':'Email non inviata: '+(err?.message||'riprova più tardi'));
+ }finally{$('sendCompanyRecovery').disabled=false}
+};
+$('verifyCompanyRecoveryLink').onclick=async()=>{
+ const value=$('companyRecoveryLink').value.trim();
+ if(!value){companyRecoveryNotice('Incolla il collegamento ricevuto via email.');return}
+ $('verifyCompanyRecoveryLink').disabled=true;
+ try{
+  const link=new URL(value);
+  const allowed=new URL('https://ztskaqyudcamdailxdef.supabase.co');
+  if(link.origin!==allowed.origin||!link.pathname.startsWith('/auth/v1/verify'))throw Error('Questo non è il link di verifica dell’account.');
+  const code=link.searchParams.get('token_hash')||link.searchParams.get('token');
+  if(!code||link.searchParams.get('type')!=='recovery')throw Error('Il collegamento non contiene un codice di recupero valido.');
+  const {error}=await db.auth.verifyOtp({type:'recovery',token_hash:code});
+  if(error)throw error;
+  $('companyRecoveryLink').value='';
+  if(await updateCompanyRecoveryState()){
+   companyRecoveryNotice('Email verificata. Imposta ora una nuova password Aerial Move.');
+  }else{companyRecoveryNotice('Verifica incompleta. Riapri il link nello stesso browser.')}
+ }catch(err){companyRecoveryNotice('Collegamento non valido, scaduto o già utilizzato. '+(err?.message||''))}
+ finally{$('verifyCompanyRecoveryLink').disabled=false}
+};
+$('saveRecoveredCompany').onclick=async()=>{
+ const p=$('companyNewPassword').value;
+ const confirm=$('companyNewConfirm').value;
+ if(p.length<10||p.length>128){companyRecoveryNotice('La nuova password deve contenere da 10 a 128 caratteri.');return}
+ if(p!==confirm){companyRecoveryNotice('Le due password non coincidono.');return}
+ if(!await verifiedRecoveryIdentity()){companyRecoveryNotice('Per reimpostare la password devi prima verificare la tua email.');return}
+ $('saveRecoveredCompany').disabled=true;
+ try{
+  const {data,error}=await db.rpc('finanze_reset_password',{p_ledger:'azienda',p_new_password:p});
+  if(error||!data)throw error||new Error('La reimpostazione non è riuscita.');
+  localStorage.removeItem(savedKey('azienda'));
+  sessionStorage.removeItem(savedKey('azienda'));
+  $('companyNewPassword').value='';
+  $('companyNewConfirm').value='';
+  $('recoverCompanyPanel').classList.add('hide');
+  try{await db.auth.signOut({scope:'local'})}catch(e){console.warn('Local auth sign out',e)}
+  say('Password Aerial Move aggiornata! Accedi con la nuova password.');
+  ledger='azienda';loginView();
+ }catch(err){companyRecoveryNotice('Impossibile reimpostare la password: '+(err?.message||'errore'))}
+ finally{$('saveRecoveredCompany').disabled=false}
+};
+db.auth.onAuthStateChange((event,current)=>{
+ if(event==='PASSWORD_RECOVERY'&&current?.user){
+  setTimeout(async()=>{
+   ledger='azienda';$('loginLedger').value='azienda';
+   $('dashboard').classList.add('hide');$('loginCard').classList.remove('hide');
+   refreshSetup();$('recoverCompanyPanel').classList.remove('hide');
+   if(await updateCompanyRecoveryState())companyRecoveryNotice('Email verificata. Scegli una nuova password Aerial Move.');
+  },0);
+ }
+});
 $('cancelPersonalRecovery').onclick=()=>{
 $('recoverPersonalPanel').classList.add('hide');
 $('recoverCompanyPass').value='';
@@ -545,6 +661,16 @@ $('seed').onclick=async()=>{if(rows.length){say('Hai già movimenti: non carico 
 if(ledger==='azienda'){for(let i=0;i<4;i++){const date=new Date(2026,9+i,5).toLocaleDateString('en-CA');[['Affitto sede',500,'Affitto'],['Hip Hop',800,'Collaboratori'],['Acrobatica',500,'Collaboratori'],['Martina',400,'Collaboratori'],['Italia',400,'Collaboratori']].forEach(x=>add(date,x[0],x[1],'uscita',x[2]));if(i<3)add(date,'Rata struttura',700,'uscita','Rate');if(i===1)add('2026-11-15','IVA novembre',350,'uscita','Fornitori');if(i===2)add('2026-12-15','Bidello',150,'uscita','Altro')}add('2027-01-31','Restituzione Orlando',800,'uscita','Rate','Data di fine gennaio; modificare se concordata una data diversa')}
 else{for(let i=0;i<12;i++)add(new Date(2026,9+i,17).toLocaleDateString('en-CA'),'Entrata mensile',1500,'entrata','Stipendio');add('2026-10-18','Mercatorum arretrati',900,'uscita','Rate','Tre rate scadute di luglio-agosto-settembre; proposta di rientro da concordare');add('2026-10-18','Mercatorum rata ottobre',300,'uscita','Rate');add('2026-10-31','PayPal totale residuo',698,'uscita','Rate','Scadenza da confermare');add('2026-10-31','Klarna totale residuo',163,'uscita','Rate','Scadenza da confermare')}
 let ok=0;for(const r of rec){const{error}=await db.rpc('finanze_direct_write',{p_token:token,p_record:r});if(error){say('Interrotto: '+error.message);break}ok++}say('Inseriti '+ok+' movimenti previsti');await load()};
-(async()=>{ledger=localStorage.getItem('am_finanze_preferred')||'azienda';$('loginLedger').value=ledger;const t=localStorage.getItem(savedKey(ledger))||sessionStorage.getItem(savedKey(ledger));if(t)await openSection(t,ledger);else loginView()})();
+(async()=>{
+ const recoveryLink=new URLSearchParams(location.hash.slice(1)).get('type')==='recovery'||new URLSearchParams(location.search).get('type')==='recovery';
+ ledger=recoveryLink?'azienda':(localStorage.getItem('am_finanze_preferred')||'azienda');
+ $('loginLedger').value=ledger;
+ const t=localStorage.getItem(savedKey(ledger))||sessionStorage.getItem(savedKey(ledger));
+ if(t&&!recoveryLink)await openSection(t,ledger);else loginView();
+ if(recoveryLink){
+  $('recoverCompanyPanel').classList.remove('hide');
+  if(await updateCompanyRecoveryState())companyRecoveryNotice('Email verificata. Imposta una nuova password Aerial Move.');
+ }
+})();
 $('loginLedger').onchange=()=>{ledger=$('loginLedger').value;localStorage.setItem('am_finanze_preferred',ledger);refreshSetup()};
 </script></body></html>
