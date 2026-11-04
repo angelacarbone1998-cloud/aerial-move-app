@@ -407,10 +407,11 @@
     }
     function downloadXlsxWorkbook(fileName,sheets){const blob=new Blob([createXlsx(xlsxWorkbookFiles(sheets))],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=fileName;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
     function personSummaryExcelSheets(data){
-      const people=new Map((data.athletes||[]).map((athlete)=>[athlete.id,{athlete,attendance:[],payments:[]}]));
-      function person(id){if(!people.has(id))people.set(id,{athlete:{id,full_name:'Atleta non disponibile',membership_code:''},attendance:[],payments:[]});return people.get(id)}
-      (data.attendance||[]).forEach((item)=>person(item.athlete_id).attendance.push(item));
-      (data.payments||[]).forEach((item)=>person(item.athlete_id).payments.push(item));
+      const activeAthletes=(data.athletes||[]).filter((athlete)=>athlete.active!==false);
+      const people=new Map(activeAthletes.map((athlete)=>[athlete.id,{athlete,attendance:[],payments:[]}]));
+      // Nel file corrente riportiamo soltanto le atlete attive: le vecchie schede archiviate non creano righe o doppioni.
+      (data.attendance||[]).forEach((item)=>{const entry=people.get(item.athlete_id);if(entry)entry.attendance.push(item)});
+      (data.payments||[]).forEach((item)=>{const entry=people.get(item.athlete_id);if(entry)entry.payments.push(item)});
       const ordered=[...people.values()].sort((a,b)=>String(a.athlete.full_name||'').localeCompare(String(b.athlete.full_name||''),'it')||String(a.athlete.membership_code||'').localeCompare(String(b.athlete.membership_code||''),'it')||String(a.athlete.id).localeCompare(String(b.athlete.id)));
       const summaryRows=[],historyRows=[],registration=(activity)=>activityKey(activity)==='quota iscrizione',cents=(amount)=>Math.round(Number(amount||0)*100);
       ordered.forEach(({athlete,attendance,payments})=>{
