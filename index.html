@@ -12,7 +12,7 @@
   <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
   <link rel="icon" type="image/png" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
-  <link rel="manifest" href="manifest.webmanifest?v=2026.11.04.78">
+  <link rel="manifest" href="manifest.webmanifest?v=2026.11.15.79">
   <title>Aerial Move</title>
   <style>
     :root{--ink:#281721;--wine:#311725;--pink:#e64286;--paper:#fffafd;--line:#eadfe6;--muted:#766b72;--good:#198258}
@@ -179,11 +179,73 @@
     }
     async function updateGuestRequest(id,status){try{await server('guest.request.status',{id,status});renderGuestRequests()}catch{alert('Non è stato possibile aggiornare la richiesta.')}}
     async function loadMetrics(){try{const data=await server('metrics');document.getElementById('metric-athletes').textContent=data.athletes;document.getElementById('metric-subs').textContent=data.subscriptions;document.getElementById('metric-medical').textContent=data.medical}catch{}}
-    const calendarActivities={room1:[['Pilates','Mini Move','Pilates','Mini Move','Pilates','Pilates'],['Pilates','Pilates','Pilates','Pilates','',''],['Amaca aerea','','Amaca aerea','','','']],room2:[['Cerchio aereo N.A.','Bungee Fly','Hip Hop','Bungee Fly','Amaca aerea','Cerchio aereo A'],['Cerchio aereo A','Tessuto aereo','Cerchio aereo A','Tessuto aereo','Attrezzi vari','Hip Hop'],['','Move Lab','','Cerchio aereo N.A.','Move Lab',''],['','Bungee Fitness','','Bungee Fitness','','']]};
-    const fallbackCalendarTimes={room1:[['13:30–14:45','17:15–18:15','13:30–14:45','17:15–18:15','17:15–20:15','17:15–20:15'],['17:15–20:15','18:15–20:15','17:15–20:15','18:15–20:15','',''],['20:30–21:30','','20:30–21:30','','','']],room2:[['18:15–19:30','13:30–14:45','17:30–18:30','13:30–14:45','13:30–14:45','15:00–17:00'],['19:30–20:30','17:00–18:00','18:30–20:30','17:00–18:00','17:00–18:15','17:00–19:00'],['','18:00–19:30','','18:15–19:30','18:15–20:00',''],['','19:00–20:00','','19:30–20:30','','']]};
-    function renderCalendar(){renderCalendarTimes(fallbackCalendarTimes);loadCalendarTimes()}
-    function renderCalendarTimes(times){const days=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'],slot=(name,time)=>name&&time?'<span class="slot">'+esc(name)+'<small>'+esc(time)+'</small></span>':'',table=(title,activities,roomTimes)=>'<section class="card" style="margin-bottom:16px"><p class="eyebrow">'+title+'</p><div class="table-wrap"><table class="schedule"><thead><tr><th>Fascia</th>'+days.map((day)=>'<th>'+day+'</th>').join('')+'</tr></thead><tbody>'+activities.map((row,rowIndex)=>'<tr><th>'+(rowIndex+1)+'</th>'+row.map((name,dayIndex)=>'<td>'+slot(name,roomTimes[rowIndex][dayIndex])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';document.getElementById('content').innerHTML=table('STANZA 1 · PILATES E AMACA',calendarActivities.room1,times.room1)+table('STANZA 2 · CALENDARIO CORSI',calendarActivities.room2,times.room2)}
-    async function loadCalendarTimes(){try{const url=new URL('calendar-times.json',location.href);url.searchParams.set('refresh',Date.now());const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('Calendario non disponibile');const times=await response.json();if(!Array.isArray(times.room1)||!Array.isArray(times.room2))throw new Error('Calendario non valido');if(state.tab==='calendar')renderCalendarTimes(times)}catch{}}
+    const calendarDays=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+    const calendarRooms={
+      room1:[
+        [
+          {time:'13:30–14:30',activity:'Pilates Reformer',instructor:'ANGELA'},
+          {time:'17:15–18:15',activity:'Pilates',instructor:'ROSI'},
+          {time:'18:15–19:15',activity:'Pilates',instructor:'ROSI'},
+          {time:'19:15–20:15',activity:'Pilates',instructor:'ROSI'}
+        ],
+        [{time:'13:30–14:30',activity:'Bungee Fitness',instructor:'ANGELA'}],
+        [{time:'13:30–14:30',activity:'Pilates Reformer',instructor:'ANGELA'}],
+        [{time:'13:30–14:30',activity:'Bungee Fitness',instructor:'ANGELA'}],
+        [
+          {time:'17:15–18:15',activity:'Pilates',instructor:'ROSI'},
+          {time:'18:15–19:15',activity:'Pilates',instructor:'ROSI'},
+          {time:'19:15–20:15',activity:'Pilates',instructor:'ROSI'}
+        ],
+        []
+      ],
+      room2:[
+        [
+          {time:'18:15–19:30',activity:'Cerchio aereo N.A.',instructor:'MARTINA'},
+          {time:'19:30–20:30',activity:'Cerchio aereo A',instructor:'ANGELA'},
+          {time:'20:30–21:30',activity:'Bungee Fitness',instructor:'ANGELA'}
+        ],
+        [
+          {time:'17:15–18:15',activity:'Mini Move',instructor:'ANGELA'},
+          {time:'17:15–18:15',activity:'Tessuto aereo',instructor:'ITALIA'},
+          {time:'18:00–19:30',activity:'Move Lab',instructor:'DEBORA'},
+          {time:'20:00–21:30',activity:'Cerchio aereo A',instructor:'ANGELA',note:'Solo preparazione gara'}
+        ],
+        [
+          {time:'17:30–18:30',activity:'Hip Hop',instructor:'ANDREA'},
+          {time:'18:30–20:00',activity:'Cerchio aereo A',instructor:'ANGELA'},
+          {time:'20:00–21:00',activity:'Bungee Fitness',instructor:'ANGELA'}
+        ],
+        [
+          {time:'17:00–18:00',activity:'Mini Move',instructor:'ANGELA'},
+          {time:'17:00–18:00',activity:'Tessuto aereo',instructor:'ITALIA'},
+          {time:'18:15–19:30',activity:'Cerchio aereo N.A.',instructor:'ITALIA'},
+          {time:'21:00–22:00',activity:'Amaca Aerea',instructor:'ANGELA'}
+        ],
+        [
+          {time:'17:00–18:15',activity:'Attrezzi vari',instructor:'MARTINA'},
+          {time:'18:15–20:00',activity:'Move Lab',note:'Anche per i gruppi Cerchio N.A. e A.'}
+        ],
+        [
+          {time:'15:00–17:00',activity:'Hip Hop',instructor:'ANDREA'},
+          {time:'15:00–17:00',activity:'Cerchio aereo A',note:'Solo preparazione gara · Palestra scolastica'}
+        ]
+      ]
+    };
+    const externalCalendar=[
+      {place:'San Chirico',day:'Lunedì',lessons:[{time:'16:30–17:30',activity:'Cerchio Aereo'},{time:'17:30–18:30',activity:'Cerchio Aereo'}]},
+      {place:'Spinoso',day:'Martedì',lessons:[{time:'20:00–21:00',activity:'Pilates'},{time:'21:00–22:00',activity:'Pilates'}]},
+      {place:'Spinoso',day:'Giovedì',lessons:[{time:'18:30–19:30',activity:'Pilates'},{time:'19:30–20:30',activity:'Pilates'}]},
+      {place:'Grumento Nova',day:'Martedì',lessons:[{time:'18:00–19:00',activity:'Pilates'}]},
+      {place:'Grumento Nova',day:'Giovedì',lessons:[{time:'18:30–19:30',activity:'Pilates'}]}
+    ];
+    function calendarLesson(lesson){const details=[lesson.time,lesson.instructor].filter(Boolean).join(' · ');return '<span class="slot" style="margin-bottom:6px">'+esc(lesson.activity)+'<small>'+esc(details)+'</small>'+(lesson.note?'<small style="margin-top:4px;font-weight:600;white-space:normal">'+esc(lesson.note)+'</small>':'')+'</span>'}
+    function calendarDay(lessons){return lessons.length?'<div style="display:grid;gap:2px">'+lessons.map(calendarLesson).join('')+'</div>':'<span class="muted">—</span>'}
+    function renderCalendar(){
+      const roomTable=(title,room)=>'<section class="card" style="margin-bottom:16px"><div class="card-head"><div><p class="eyebrow">CALENDARIO SETTIMANALE</p><h2>'+title+'</h2></div></div><div class="table-wrap"><table class="schedule"><thead><tr>'+calendarDays.map((day)=>'<th>'+day+'</th>').join('')+'</tr></thead><tbody><tr>'+room.map((lessons)=>'<td>'+calendarDay(lessons)+'</td>').join('')+'</tr></tbody></table></div></section>';
+      const externalRows=externalCalendar.map((row)=>'<tr><td><b>'+esc(row.place)+'</b></td><td>'+esc(row.day)+'</td><td>'+row.lessons.map((lesson)=>'<span class="status neutral" style="margin:2px 5px 2px 0">'+esc(lesson.time)+' · '+esc(lesson.activity)+'</span>').join('')+'</td></tr>').join('');
+      const external='<section class="card"><div class="card-head"><div><p class="eyebrow">PAESI ESTERNI</p><h2>Corsi nelle altre sedi</h2></div></div><div class="table-wrap"><table class="table"><thead><tr><th>Località</th><th>Giorno</th><th>Orari e attività</th></tr></thead><tbody>'+externalRows+'</tbody></table></div><p class="muted" style="margin-bottom:0">Il calendario potrà subire variazioni.</p></section>';
+      document.getElementById('content').innerHTML=roomTable('STANZA 1',calendarRooms.room1)+roomTable('STANZA 2',calendarRooms.room2)+external;
+    }
     function renderSubscription(){document.getElementById('content').innerHTML='<section class="card" style="max-width:700px"><p class="eyebrow">CODICE TESSERA</p><h2>Controlla la tua scadenza</h2><p class="muted">Inserisci il codice personale consegnato dalla palestra.</p><form class="lookup" onsubmit="lookupSubscription(event)"><input id="member-code" required minlength="8" autocomplete="off" placeholder="Codice tessera"><button>Mostra scadenza</button></form><div id="subscription-result"></div></section>'}
     function todayLocal(){const date=new Date();date.setMinutes(date.getMinutes()-date.getTimezoneOffset());return date.toISOString().slice(0,10)}
     function formatPilatesDate(value){return new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(value+'T12:00:00'))}
