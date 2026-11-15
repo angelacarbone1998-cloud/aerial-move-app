@@ -1,4 +1,4 @@
-const APP_VERSION = '2026.11.15.79';
+const APP_VERSION = '2026.11.15.80';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -26,7 +26,7 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data?.json() || {}; } catch { data = { body: event.data?.text() || '' }; }
   event.waitUntil(self.registration.showNotification(data.title || 'Aerial Move', {
-    body: data.body || 'Sono disponibili nuovi turni Pilates.',
+    body: data.body || 'Sono disponibili nuovi turni.',
     icon: 'aerial-move-logo.png',
     badge: 'aerial-move-logo.png',
     tag: data.tag || 'aerial-move-pilates',
