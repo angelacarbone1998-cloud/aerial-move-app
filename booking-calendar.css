@@ -1,0 +1,50 @@
+/* Booking calendar: compact enough for a phone, set in the existing Aerial Move palette. */
+.am-booking-card{max-width:960px}
+.am-booking-intro{margin:.3rem 0 1rem;color:var(--muted);font-size:.92rem}
+.am-booking-layout{display:grid;grid-template-columns:minmax(245px,330px) minmax(0,1fr);gap:clamp(16px,2.3vw,26px);align-items:start}
+.am-cal-host,.am-day-panel{min-width:0}
+.am-cal-shell{min-inline-size:0;margin:0;border:1px solid #ead9e3;border-radius:15px;padding:12px;background:#fffafd}
+.am-cal-bar,.am-cal-switch,.am-cal-key{display:flex;align-items:center}
+.am-cal-bar{justify-content:space-between;gap:8px;margin-bottom:7px}
+.am-cal-title{font:bold 1.13rem/1.25 Georgia,serif;color:var(--wine)}
+.am-cal-title::first-letter,.am-day-title::first-letter{text-transform:uppercase}
+.am-cal-switch{gap:3px}
+.am-cal-switch button{display:grid;place-items:center;width:42px;height:42px;background:#fff;border:1px solid #dcc8d4;border-radius:10px;color:#672544;font:1.55rem/1 Georgia,serif}
+.am-cal-switch button:disabled{border-color:transparent;background:transparent;color:#ad9ca6;cursor:default}
+.am-cal-table{border-spacing:3px;width:100%;table-layout:fixed;text-align:center}
+.am-cal-table th{font-size:.72rem;color:#6c5965;font-weight:700;padding:3px 0}
+.am-cal-table td{padding:0}
+.am-cal-day{position:relative;width:100%;min-height:41px;border:1px solid transparent;border-radius:9px;background:transparent;color:#61545c;font-weight:600;padding:3px 0 6px;line-height:1}
+.am-cal-day:disabled{color:#aa9da5;cursor:default}
+.am-cal-day.has-sessions{background:#fae4ef;color:#78244e;font-weight:800}
+.am-cal-day[aria-current=date]{border-color:#9e3e69}
+.am-cal-day.has-sessions::after,.am-cal-dot{width:5px;height:5px;border-radius:50%;background:#91295c}
+.am-cal-day.has-sessions::after{content:"";position:absolute;bottom:4px;left:calc(50% - 2.5px)}
+.am-cal-day[aria-pressed=true]{background:var(--wine);color:white}
+.am-cal-day[aria-pressed=true]::after{background:#ffb9d4}
+.am-cal-shell button:focus-visible,.am-book-action:focus-visible{outline:3px solid #a83e70;outline-offset:1px}
+.am-cal-key{gap:8px;margin:9px 3px 1px;font-size:.75rem;color:#6a5964}
+.am-cal-dot{display:inline-block;flex:0 0 6px;height:6px}
+.am-day-panel{scroll-margin-top:14px}
+.am-day-title{font:700 1.15rem/1.3 Georgia,serif;color:var(--wine);margin:2px 0 8px}
+.am-day-placeholder{margin:0;border:1px dashed #dfccd7;border-radius:10px;color:#695762;background:#fffafd;font-size:.9rem;padding:14px}
+.am-day-panel .field{margin:8px 0 12px}
+.am-day-panel .field[hidden]{display:none}
+.am-course{margin-top:14px}
+.am-course h4{margin:0 0 6px;color:#812e54;font-size:.87rem}
+.am-turn{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0}
+.am-turn-time{display:block;color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.am-turn-place,.am-turn-rule{display:block;color:var(--muted);font-size:.79rem}
+.am-turn-availability{display:block;margin-top:3px;font-size:.78rem;color:#28684d;font-weight:700}
+.am-turn-availability.is-closed{color:#735d68}
+.am-book-action{min-height:42px;border:0;border-radius:9px;background:var(--wine);color:white;padding:7px 12px;font-size:.84rem;font-weight:700}
+.am-book-action:disabled{background:#f2ebef;color:#6b5963;cursor:default}
+.am-roster-turn{border-top:1px solid var(--line);padding:8px 0}
+.am-roster-turn .am-turn{border:0;padding:2px 0}
+.am-roster-turn .attendance-row{font-size:.86rem;padding:7px 0}
+.am-roster-turn .attendance-row button{min-height:36px}
+.am-no-bookings{color:var(--muted);font-size:.82rem;margin:5px 0}
+.am-booking-extra{max-width:960px;margin-top:16px}
+@media(max-width:950px){.am-booking-layout{grid-template-columns:1fr}.am-cal-host{width:100%;max-width:410px}}
+@media(max-width:560px){.am-booking-card{padding:15px}.am-cal-shell{padding:9px}.am-booking-layout{gap:14px}.am-cal-day{min-height:42px}.am-cal-table{border-spacing:2px}.am-book-action{max-width:40%}}
+@media(forced-colors:active){.am-cal-day.has-sessions{border:1px solid ButtonText}.am-cal-day[aria-pressed=true]{outline:2px solid Highlight}.am-cal-day.has-sessions::after,.am-cal-dot{background:CanvasText}}
