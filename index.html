@@ -12,10 +12,10 @@
   <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
   <link rel="icon" type="image/png" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
-  <link rel="manifest" href="manifest.webmanifest?v=2026.11.20.82">
+  <link rel="manifest" href="manifest.webmanifest?v=2026.11.20.83">
   <title>Aerial Move</title>
-  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.20.82">
-  <script src="booking-calendar.js?v=2026.11.20.82" defer></script>
+  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.20.83">
+  <script src="booking-calendar.js?v=2026.11.20.83" defer></script>
   <style>
     :root{--ink:#281721;--wine:#311725;--pink:#e64286;--paper:#fffafd;--line:#eadfe6;--muted:#766b72;--good:#198258}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
@@ -40,7 +40,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const APP_VERSION='2026.11.20.82';
+    const APP_VERSION='2026.11.20.83';
     const STORAGE_KEY='aerial_move_session_v2';
     const state={role:'atlete',mode:'login',token:localStorage.getItem(STORAGE_KEY)||sessionStorage.getItem(STORAGE_KEY)||'',profile:null,tab:'home',athletes:[],editing:null,summary:null};
     let quickPaymentContext={athleteId:null,fromAthlete:false,dirty:false};
@@ -154,7 +154,7 @@
     function formatRequestDate(value){if(!value)return '';return new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
     async function updateInformationRequest(id,status){try{await server('request.status',{id,status});renderInstructorRequests()}catch{alert('Non è stato possibile aggiornare la richiesta.')}}
     function renderGuestPublic(){
-      root.innerHTML='<main class="auth"><section class="auth-copy"><div class="brand"><img src="aerial-move-logo.png" alt="Logo Aerial Move"><b>AERIAL<i>MOVE</i></b></div><p class="eyebrow" style="color:#f6b9d2">AREA OSPITI</p><h1>Prenota Pilates Reformer.</h1><p>Scegli uno degli orari disponibili, poi inserisci nome e cognome. La prenotazione arriverà direttamente alle istruttrici.</p></section><section class="auth-panel"><p class="eyebrow">PRENOTAZIONE OSPITE</p><h2>Pilates Reformer</h2><p class="muted">Non serve password né codice tessera.</p><form class="auth-form" style="margin-top:20px" onsubmit="bookGuestReformer(event)"><label for="guest-first-name">Nome</label><input id="guest-first-name" maxlength="100" autocomplete="given-name" required placeholder="Il tuo nome"><label for="guest-last-name">Cognome</label><input id="guest-last-name" maxlength="100" autocomplete="family-name" required placeholder="Il tuo cognome"><label for="guest-reformer-session">Data e orario</label><select id="guest-reformer-session" required style="width:100%;padding:13px;border:1px solid #ddcfd6;border-radius:10px;background:#fff"><option value="">Caricamento turni…</option></select><button class="primary" id="guest-request-send" type="submit">Prenota Pilates Reformer</button></form><div id="guest-request-feedback" aria-live="polite"></div><button class="link" type="button" onclick="leaveGuestArea()">Torna alle aree di accesso</button></section></main>';loadGuestReformerSessions();
+      root.innerHTML='<main class="auth"><section class="auth-copy"><div class="brand"><img src="aerial-move-logo.png" alt="Logo Aerial Move"><b>AERIAL<i>MOVE</i></b></div><p class="eyebrow" style="color:#f6b9d2">AREA OSPITI</p><h1>Prenota Pilates Reformer.</h1><p>Scegli uno degli orari disponibili, poi inserisci nome e cognome. La prenotazione arriverà direttamente alle istruttrici.</p></section><section class="auth-panel"><p class="eyebrow">PRENOTAZIONE OSPITE</p><h2>Pilates Reformer</h2><p class="muted">Non serve password né codice tessera. Se cambi turno nello stesso giorno, resta valida solo l’ultima prenotazione. Il cambio va fatto almeno due ore prima del turno precedente.</p><form class="auth-form" style="margin-top:20px" onsubmit="bookGuestReformer(event)"><label for="guest-first-name">Nome</label><input id="guest-first-name" maxlength="100" autocomplete="given-name" required placeholder="Il tuo nome"><label for="guest-last-name">Cognome</label><input id="guest-last-name" maxlength="100" autocomplete="family-name" required placeholder="Il tuo cognome"><label for="guest-reformer-session">Data e orario</label><select id="guest-reformer-session" required style="width:100%;padding:13px;border:1px solid #ddcfd6;border-radius:10px;background:#fff"><option value="">Caricamento turni…</option></select><button class="primary" id="guest-request-send" type="submit">Prenota Pilates Reformer</button></form><div id="guest-request-feedback" aria-live="polite"></div><button class="link" type="button" onclick="leaveGuestArea()">Torna alle aree di accesso</button></section></main>';loadGuestReformerSessions();
     }
     async function loadGuestReformerSessions(){
       const select=document.getElementById('guest-reformer-session'),feedback=document.getElementById('guest-request-feedback');if(!select)return;
@@ -166,7 +166,7 @@
       const firstName=document.getElementById('guest-first-name').value.trim(),lastName=document.getElementById('guest-last-name').value.trim(),sessionId=document.getElementById('guest-reformer-session').value,feedback=document.getElementById('guest-request-feedback'),button=document.getElementById('guest-request-send');
       if(!firstName||!lastName||!sessionId){feedback.innerHTML='<p class="notice error">Completa nome, cognome e seleziona un orario.</p>';return}
       button.disabled=true;button.textContent='Prenotazione…';
-      try{const result=await server('guest.reformer.book',{firstName,lastName,sessionId:Number(sessionId)});event.target.reset();feedback.innerHTML='<p class="notice">'+(result.alreadyBooked?'La prenotazione è già confermata. Nessun duplicato creato.':'Prenotazione effettuata con successo.')+(result.booking?' <b>'+esc(formatPilatesDate(result.booking.booking_date)+' · '+result.booking.time_slot)+'</b>.':'')+'</p>';loadGuestReformerSessions()}
+      try{const result=await server('guest.reformer.book',{firstName,lastName,sessionId:Number(sessionId)});event.target.reset();feedback.innerHTML='<p class="notice">'+(result.alreadyBooked?'La prenotazione è già confermata. Nessun duplicato creato.':result.replaced?'Prenotazione spostata. Il turno precedente è stato liberato.':'Prenotazione effettuata con successo.')+(result.booking?' <b>'+esc(formatPilatesDate(result.booking.booking_date)+' · '+result.booking.time_slot)+'</b>.':'')+'</p>';loadGuestReformerSessions()}
       catch(error){feedback.innerHTML='<p class="notice error">'+esc(error.message||'Non è stato possibile completare la prenotazione.')+'</p>'}
       finally{button.disabled=false;button.textContent='Prenota Pilates Reformer'}
     }
