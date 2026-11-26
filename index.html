@@ -12,10 +12,10 @@
   <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
   <link rel="icon" type="image/png" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
-  <link rel="manifest" href="manifest.webmanifest?v=2026.11.20.84">
+  <link rel="manifest" href="manifest.webmanifest?v=2026.11.26.85">
   <title>Aerial Move</title>
-  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.20.84">
-  <script src="booking-calendar.js?v=2026.11.20.84" defer></script>
+  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.26.85">
+  <script src="booking-calendar.js?v=2026.11.26.85" defer></script>
   <style>
     :root{--ink:#281721;--wine:#311725;--pink:#e64286;--paper:#fffafd;--line:#eadfe6;--muted:#766b72;--good:#198258}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
@@ -40,7 +40,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const APP_VERSION='2026.11.20.84';
+    const APP_VERSION='2026.11.26.85';
     const STORAGE_KEY='aerial_move_session_v2';
     const state={role:'atlete',mode:'login',token:localStorage.getItem(STORAGE_KEY)||sessionStorage.getItem(STORAGE_KEY)||'',profile:null,tab:'home',athletes:[],editing:null,summary:null};
     let quickPaymentContext={athleteId:null,fromAthlete:false,dirty:false};
@@ -335,7 +335,7 @@
     function normalizePrice(value){const cleaned=String(value??'').trim().replace(/\s+/g,'').replace(',','.');if(!cleaned)return '';if(!/^\d+(?:\.\d{1,2})?$/.test(cleaned))return null;const amount=Number(cleaned);return Number.isFinite(amount)&&amount>=0&&amount<=99999999.99?String(amount):null}
     function medicalStatus(value){if(!value)return '<span class="status neutral">Data non inserita</span>';const today=new Date();today.setHours(0,0,0,0);const expires=new Date(value+'T12:00:00');const days=Math.ceil((expires-today)/86400000);if(days<0)return '<span class="status danger">Scaduto da '+Math.abs(days)+' giorni</span>';if(days===0)return '<span class="status danger">Scade oggi</span>';if(days<=30)return '<span class="status warn">Scade tra '+days+' giorni</span>';return '<span class="status">Valido fino al '+fmt(value)+'</span>'}
     function subscriptionStatus(value){if(!value)return '<span class="status neutral">Data non inserita</span>';const today=new Date();today.setHours(0,0,0,0);const expires=new Date(value+'T12:00:00');const days=Math.ceil((expires-today)/86400000);if(days<0)return '<span class="status danger">⚠ Abbonamento scaduto da '+Math.abs(days)+' giorni</span>';if(days===0)return '<span class="status danger">⚠ Abbonamento scade oggi</span>';if(days<=7)return '<span class="status warn">⚠ Abbonamento scade tra '+days+' giorni</span>';return '<span class="status">Valido fino al '+fmt(value)+'</span>'}
-    function packageFields(a){return '<fieldset class="field full"><span>Pacchetti a lezioni · validità massima 2 mesi</span><small class="muted">Compila soltanto la data relativa alle attività selezionate. Per rinnovare un pacchetto, inserisci la nuova data di inizio.</small><div class="form-grid"><label class="field"><span>Pilates Base · 6 lezioni</span><input id="f-pilates_base_started_on" type="date" value="'+esc(a.pilates_base_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label><label class="field"><span>Pilates Plus · 8 lezioni</span><input id="f-pilates_plus_started_on" type="date" value="'+esc(a.pilates_plus_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label><label class="field"><span>Bungee Fly · 6 lezioni</span><input id="f-bungee_fly_started_on" type="date" value="'+esc(a.bungee_fly_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label></div></fieldset>'}
+    function packageFields(a){return '<fieldset class="field full"><span>Pacchetti a lezioni · validità massima 2 mesi</span><small class="muted">Compila soltanto la data relativa alle attività selezionate. Per rinnovare un pacchetto, inserisci la nuova data di inizio.</small><div class="form-grid"><label class="field"><span>Pilates Base · 6 lezioni</span><input id="f-pilates_base_started_on" type="date" value="'+esc(a.pilates_base_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label><label class="field"><span>Pilates Plus · 8 lezioni</span><input id="f-pilates_plus_started_on" type="date" value="'+esc(a.pilates_plus_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label><label class="field"><span>Bungee Fly · 8 lezioni</span><input id="f-bungee_fly_started_on" type="date" value="'+esc(a.bungee_fly_started_on||'')+'"><small class="muted">Data di inizio del pacchetto.</small></label></div></fieldset>'}
     function currentMonthKey(){return todayLocal().slice(0,7)}
     function monthLabel(monthKey){if(!/^\d{4}-\d{2}$/.test(String(monthKey||'')))return '';const label=new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(new Date(monthKey+'-01T12:00:00'));return label.charAt(0).toUpperCase()+label.slice(1)}
     function renderUnpaidPayments(){const month=currentMonthKey();document.getElementById('content').innerHTML='<section class="card"><div class="card-head"><div><p class="eyebrow">CONTROLLO QUOTE</p><h2>Quote mensili e iscrizioni mancanti</h2></div><button class="small-btn" onclick="loadUnpaidPayments()">Aggiorna elenco</button></div><p class="muted">Per ogni persona trovi prima le quote attività mancanti e, subito sotto, la quota d’iscrizione.</p><div class="form-grid" style="margin-top:16px"><label class="field" style="max-width:280px"><span>Mese da controllare per le quote attività</span><input id="unpaid-month" type="month" value="'+month+'" onchange="loadUnpaidPayments()"></label></div></section><div id="unpaid-payments-list"><section class="card" style="margin-top:16px"><p class="muted">Controllo quote in corso…</p></section></div>';loadUnpaidPayments()}
