@@ -12,10 +12,10 @@
   <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
   <link rel="icon" type="image/png" href="https://ztskaqyudcamdailxdef.supabase.co/functions/v1/aerial-move?asset=app-icon-v2">
-  <link rel="manifest" href="manifest.webmanifest?v=2026.11.26.86">
+  <link rel="manifest" href="manifest.webmanifest?v=2026.11.27.87">
   <title>Aerial Move</title>
-  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.26.86">
-  <script src="booking-calendar.js?v=2026.11.26.86" defer></script>
+  <link rel="stylesheet" href="booking-calendar.css?v=2026.11.27.87">
+  <script src="booking-calendar.js?v=2026.11.27.87" defer></script>
   <style>
     :root{--ink:#281721;--wine:#311725;--pink:#e64286;--paper:#fffafd;--line:#eadfe6;--muted:#766b72;--good:#198258}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Arial,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
@@ -41,7 +41,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const APP_VERSION='2026.11.26.86';
+    const APP_VERSION='2026.11.27.87';
     const STORAGE_KEY='aerial_move_session_v2';
     const state={role:'atlete',mode:'login',token:localStorage.getItem(STORAGE_KEY)||sessionStorage.getItem(STORAGE_KEY)||'',profile:null,tab:'home',athletes:[],editing:null,summary:null};
     let quickPaymentContext={athleteId:null,fromAthlete:false,dirty:false};
@@ -318,7 +318,18 @@
     async function deletePrivate(id){try{await server('private.delete',{id});loadPrivateLessons()}catch{const button=document.getElementById('delete-private-'+id);if(button){button.textContent='Elimina';button.onclick=()=>requestDeletePrivate(id)}alert('Non è stato possibile eliminare la lezione privata.')}}
     function normalizeMembershipCode(value){return String(value||'').trim().toUpperCase().replace(/\s+/g,'')}
     function athleteAttendance(rows){const attendance=Array.isArray(rows)?rows:[];if(!attendance.length)return '<div class="attendance-history"><h4>Presenze</h4><p class="muted">Non ci sono ancora presenze registrate.</p></div>';return '<div class="attendance-history"><h4>Presenze registrate · '+attendance.length+'</h4><ul>'+attendance.map((item)=>'<li><b>'+esc(item.activity)+'</b><time>'+fmt(item.class_date)+'</time></li>').join('')+'</ul></div>'}
-    async function lookupSubscription(event){event.preventDefault();const box=document.getElementById('subscription-result');const code=normalizeMembershipCode(document.getElementById('member-code').value);if(!code){box.innerHTML='<p class="notice error">Inserisci il codice tessera.</p>';return}box.innerHTML='<p class="notice">Ricerca dei dati…</p>';try{const row=await server('subscription.lookup',{membershipCode:code});box.innerHTML=row?'<div class="result"><span><strong>Attività:</strong> '+esc(row.activity)+'<br><strong>Istruttrice:</strong> '+esc(row.instructor)+'</span><div class="result-details"><div><strong>Abbonamento:</strong>'+subscriptionOverview(row)+'</div><p><strong>Prezzo mensile:</strong> '+euro(row.monthly_price)+'</p><p><strong>Scadenza certificato medico:</strong><br>'+medicalStatus(row.medical_certificate_expires_on)+'</p></div>'+athleteAttendance(row.attendance)+'</div>':'<p class="notice error">Codice non trovato. Controlla che sia stato salvato nella scheda atleta.</p>'}catch{box.innerHTML='<p class="notice error">Non è stato possibile controllare il codice. Esci e rientra nell’app, poi riprova.</p>'}}
+    function athleteBookingHistory(rows,attendance){
+      if(!Array.isArray(rows))return '';
+      const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
+      const attended=Array.isArray(attendance)?attendance:[];
+      const family=v=>String(v||'').toLowerCase().startsWith('pilates')?'pilates':String(v||'').toLowerCase().startsWith('bungee')?'bungee':String(v||'').toLowerCase();
+      return '<div class="attendance-history"><h4>Prenotazioni effettuate · '+rows.length+'</h4><p class="muted">Qui trovi anche le prenotazioni passate. Le prenotazioni dei corsi impegnano lezioni del pacchetto anche senza una presenza registrata; presenza e prenotazione della stessa giornata non vengono sommate due volte. Le lezioni private sono indicate separatamente.</p>'+(rows.length?'<ul>'+rows.map(item=>{
+        const present=item.kind!=='private'&&attended.some(a=>a.class_date===item.booking_date&&family(a.activity)===family(item.activity));
+        const status=present?'Presenza registrata':item.booking_date>=today?'Prenotata':'Prenotazione passata · presenza non registrata';
+        return '<li style="flex-wrap:wrap;gap:5px"><span><b>'+esc(item.kind==='private'?'Lezione privata · '+item.activity:item.activity)+'</b><br><small class="muted">'+esc(status)+'</small></span><time>'+fmt(item.booking_date)+' · '+esc(item.time_slot)+'</time></li>';
+      }).join('')+'</ul>':'<p class="muted">Non risultano prenotazioni.</p>')+'</div>';
+    }
+    async function lookupSubscription(event){event.preventDefault();const box=document.getElementById('subscription-result');const code=normalizeMembershipCode(document.getElementById('member-code').value);if(!code){box.innerHTML='<p class="notice error">Inserisci il codice tessera.</p>';return}box.innerHTML='<p class="notice">Ricerca dei dati…</p>';try{const row=await server('subscription.lookup',{membershipCode:code});box.innerHTML=row?'<div class="result"><span><strong>Attività:</strong> '+esc(row.activity)+'<br><strong>Istruttrice:</strong> '+esc(row.instructor)+'</span><div class="result-details"><div><strong>Abbonamento:</strong>'+subscriptionOverview(row)+'</div><p><strong>Prezzo mensile:</strong> '+euro(row.monthly_price)+'</p><p><strong>Scadenza certificato medico:</strong><br>'+medicalStatus(row.medical_certificate_expires_on)+'</p></div>'+athleteAttendance(row.attendance)+athleteBookingHistory(row.bookings,row.attendance)+'</div>':'<p class="notice error">Codice non trovato. Controlla che sia stato salvato nella scheda atleta.</p>'}catch{box.innerHTML='<p class="notice error">Non è stato possibile controllare il codice. Esci e rientra nell’app, poi riprova.</p>'}}
     function renderTraining(){document.getElementById('content').innerHTML='<section class="training-intro"><div><p class="eyebrow" style="color:#f6b9d2">SETTIMANA COMPLETA · 7 SCHEDE</p><h2>Allenamenti a casa da 50 minuti</h2><p>Tocca il titolo del giorno: la scheda completa si apre qui nell’app.</p></div><span class="training-time">50<small>MINUTI</small></span></section><div class="workouts">'+trainingDays.map((d,i)=>'<button class="training-card" type="button" onclick="openWorkout('+i+')"><img src="'+trainingImages[d.image]+'" alt=""><span><em>GIORNO '+(i+1)+' · '+d.day.toUpperCase()+'</em><h3>'+d.title+'</h3><p>Stretching iniziale, lavoro mirato e defaticamento finale.</p><b>Apri la scheda →</b></span></button>').join('')+'</div><p class="training-safety">Lavora con i tuoi tempi, senza molleggiare e senza forzare ponte o spaccate. Interrompi se avverti dolore.</p>'}
     function workoutPhase(number,title,items){return '<section class="phase"><span class="phase-number">'+number+'</span><div><h3>'+title+'</h3><ol class="exercise-list">'+items.map((item)=>'<li><b>'+esc(item[0])+'</b><span>'+esc(item[1])+'</span></li>').join('')+'</ol></div></section>'}
     function openWorkout(index){const d=trainingDays[index];document.body.insertAdjacentHTML('beforeend','<div class="modal" id="workout-modal"><article class="modal-box workout-sheet"><div class="card-head"><div><p class="eyebrow">'+d.day.toUpperCase()+' · 50 MINUTI</p><h2>'+d.title+'</h2><p class="workout-meta">Materiale: '+d.kit+'</p></div><button type="button" onclick="closeWorkout()">Chiudi</button></div><img src="'+trainingImages[d.image]+'" alt="Esempi degli esercizi"><div>'+workoutPhase('1','Stretching e riscaldamento · 12 min',trainingWarm)+workoutPhase('2','Allenamento mirato · 30 min',d.focus)+workoutPhase('3','Defaticamento finale · 8 min',trainingCool)+'</div><p class="workout-warning">Gli esercizi avanzati vanno eseguiti soltanto se la tecnica è già stabile. Non forzare e interrompi in caso di dolore.</p><div class="actions"><button class="save" type="button" onclick="closeWorkout()">Torna agli allenamenti</button></div></article></div>');document.body.style.overflow='hidden'}
