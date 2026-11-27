@@ -856,6 +856,24 @@ async function handlePost(request) {
     return json({ ok: true });
   }
 
+  if(input.action==="guest.profiles.list"){
+    requireRole(session,"istruttrici");
+    const profiles=[];
+    for(let offset=0;;offset+=200){
+      const page=await serverFetch("/rest/v1/guest_profiles?select=id,full_name,phone,notes,guest_profile_lessons(lesson_date,activity,time_slot,booking_id)&order=full_name.asc,id.asc&limit=200&offset="+offset);
+      profiles.push(...page.map(({guest_profile_lessons,...p})=>({...p,lessons:(guest_profile_lessons||[]).map(({booking_id,...l})=>({...l,in_register:booking_id!=null})).sort((a,b)=>(b.lesson_date+b.time_slot).localeCompare(a.lesson_date+a.time_slot))})));
+      if(page.length<200)break;
+    }
+    return json({profiles});
+  }
+  if(input.action==="guest.profiles.update"){
+    requireRole(session,"istruttrici");
+    const id=cleanUuid(input.id);
+    if(typeof input.phone!=="string"||input.phone.length>60||typeof input.notes!=="string"||input.notes.length>2000)return json({error:"Dati non validi."},400);
+    const rows=await serverFetch("/rest/v1/guest_profiles?id=eq."+id+"&select=id",{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({phone:input.phone.trim(),notes:input.notes.trim()})});
+    if(!rows.length)return json({error:"Scheda non trovata."},404);
+    return json({ok:true});
+  }
   if (input.action === "guest.request.list") {
     requireRole(session, "istruttrici");
     const rows = await serverFetch("/rest/v1/guest_requests?select=id,first_name,last_name,activity,status,created_at,handled_at&order=created_at.desc&limit=5000");
